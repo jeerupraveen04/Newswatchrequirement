@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Danger Zone (Super Admin)</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-admin="true" data-super="true" data-page="danger">
+<div class="admin-main">
+  <h1 class="page-title" style="margin-bottom:2px">Danger zone</h1>
+  <p class="page-sub">Soft-delete / restore users, hard-delete articles, and audit log &middot; <b>Super Admin only</b></p>
+
+  <div class="toast-note mb-3" style="background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.25);color:var(--error)">
+    Destructive actions here are irreversible and fully audited.
+  </div>
+
+  <div class="card card-pad mb-3">
+    <div class="section-title">Users &mdash; soft delete <span class="badge badge-warning" style="margin-left:6px">soft</span></div>
+    <p class="small muted mb-2">Sets <code>is_deleted = true</code>. Rows are never physically removed; accounts can be restored.</p>
+    <div class="row mb-2">
+      <button class="chip active">Soft-deleted</button>
+      <button class="chip">Active</button>
+      <div class="search-box" style="margin-left:auto"><span>&#9906;</span><input placeholder="Search users..." /></div>
+    </div>
+    <table class="table">
+      <tr><th>User</th><th>Email</th><th>Role</th><th>Deleted by</th><th>Deleted</th><th>Actions</th></tr>
+      <tr>
+        <td>Meera Iyer</td><td>meera@example.com</td><td>User</td><td>Sana Khan</td><td>3d ago</td>
+        <td class="row"><button class="btn btn-secondary btn-sm" onclick="owConfirm({title:'Restore user',message:'Clear is_deleted and reactivate this account?',confirmLabel:'Restore',onConfirm:function(){owToast('User restored')}})">Restore</button><button class="btn btn-danger btn-sm" onclick="owConfirm({title:'Purge user',message:'Permanently delete this user and all data. This cannot be undone.',confirmLabel:'Purge',onConfirm:function(){owToast('User purged')}})">Purge</button></td>
+      </tr>
+      <tr>
+        <td>Arjun Rao</td><td>arjun@example.com</td><td>Reporter</td><td>Sana Khan</td><td>1w ago</td>
+        <td class="row"><button class="btn btn-secondary btn-sm" onclick="owConfirm({title:'Restore user',message:'Clear is_deleted and reactivate this account?',confirmLabel:'Restore',onConfirm:function(){owToast('User restored')}})">Restore</button><button class="btn btn-danger btn-sm" onclick="owConfirm({title:'Purge user',message:'Permanently delete this user and all data. This cannot be undone.',confirmLabel:'Purge',onConfirm:function(){owToast('User purged')}})">Purge</button></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card card-pad mb-3" style="border:1px solid rgba(220,38,38,.3)">
+    <div class="section-title" style="color:var(--error)">Hard delete article <span class="badge badge-error" style="margin-left:6px">irreversible</span></div>
+    <p class="small muted mb-2">Permanently removes the article row and its dependents (images, likes, bookmarks, comments) and queues media for deletion.</p>
+    <div class="field" style="max-width:520px">
+      <label>Article ID or slug</label>
+      <input class="input" placeholder="e.g. metro-phase-3-approved" />
+      <div class="hint">Type the exact title below to confirm.</div>
+    </div>
+    <div class="field" style="max-width:520px">
+      <label>Type the article title to confirm</label>
+      <input class="input" placeholder="Metro Phase 3 Approved By Cabinet" />
+    </div>
+    <button class="btn btn-danger" onclick="owConfirm({title:'Hard delete article',message:'Permanently remove this article and all its media. This cannot be undone.',confirmLabel:'Delete permanently',onConfirm:function(){owToast('Article permanently deleted')}})">Permanently delete article</button>
+  </div>
+
+  <div class="card card-pad">
+    <div class="row-between mb-2">
+      <div class="section-title" style="margin-bottom:0">Audit log</div>
+      <button class="btn btn-secondary btn-sm" onclick="owToast('Exporting CSV')">Export CSV</button>
+    </div>
+    <table class="table">
+      <tr><th>When</th><th>Actor</th><th>Action</th><th>Target</th><th>Result</th></tr>
+      <tr><td>2m ago</td><td>Sana Khan (super_admin)</td><td>user.soft_delete</td><td>Meera Iyer</td><td><span class="badge badge-success">OK</span></td></tr>
+      <tr><td>1h ago</td><td>Sana Khan (super_admin)</td><td>article.hard_delete</td><td>tech-park-delayed</td><td><span class="badge badge-success">OK</span></td></tr>
+      <tr><td>3h ago</td><td>Vikram (admin)</td><td>article.approve</td><td>metro-phase-3</td><td><span class="badge badge-warning">OUT_OF_SCOPE</span></td></tr>
+      <tr><td>1d ago</td><td>Sana Khan (super_admin)</td><td>app_settings.update</td><td>ads@newswatch.com</td><td><span class="badge badge-success">OK</span></td></tr>
+    </table>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+</body>
+</html>

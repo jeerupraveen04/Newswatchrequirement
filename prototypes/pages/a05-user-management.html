@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — User Management</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-admin="true" data-super="true" data-page="users">
+<div class="admin-main">
+  <h1 class="page-title" style="margin-bottom:2px">User management</h1>
+  <p class="page-sub">Manage users, reporters, admins and super admins. Admins are region-scoped.</p>
+
+  <div class="row mb-3">
+    <button class="chip active">All</button>
+    <button class="chip">Users</button>
+    <button class="chip">Reporters</button>
+    <button class="chip">Admins</button>
+    <button class="chip">Super Admins</button>
+    <button class="chip">Deleted</button>
+    <div class="search-box" style="margin-left:auto"><span>&#9906;</span><input placeholder="Search users..." /></div>
+  </div>
+
+  <table class="table">
+    <tr><th>Name</th><th>Email</th><th>Role</th><th>Region scope</th><th>Status</th><th>Actions</th></tr>
+    <tr><td>Aarav Sharma</td><td>aarav@example.com</td><td><span class="badge badge-muted">User</span></td><td class="muted">&mdash;</td><td><span class="badge badge-success">Active</span></td>
+      <td class="row"><button class="btn btn-ghost btn-sm" onclick="owUserModal('Aarav Sharma','aarav@example.com','User')">View</button><button class="btn btn-ghost btn-sm" onclick="owRoleModal('Aarav Sharma','User')">Change role</button></td></tr>
+    <tr><td>Rahul Verma</td><td>rahul@example.com</td><td><span class="badge badge-warning">Reporter</span></td><td class="muted">Secunderabad &rarr; mandals</td><td><span class="badge badge-success">Active</span></td>
+      <td class="row"><button class="btn btn-ghost btn-sm" onclick="owUserModal('Aarav Sharma','aarav@example.com','User')">View</button><button class="btn btn-ghost btn-sm" onclick="owScopeModal('Rahul Verma')">Scopes</button></td></tr>
+    <tr><td>Vikram Rao</td><td>vikram@newswatch.com</td><td><span class="badge badge-purple">Admin</span></td><td class="muted">Hyderabad district</td><td><span class="badge badge-success">Active</span></td>
+      <td class="row"><button class="btn btn-ghost btn-sm" onclick="owUserModal('Aarav Sharma','aarav@example.com','User')">View</button><button class="btn btn-ghost btn-sm" onclick="owScopeModal('Rahul Verma')">Scopes</button></td></tr>
+    <tr><td>Sana Khan</td><td>sana@newswatch.com</td><td><span class="badge badge-error">Super Admin</span></td><td class="muted">Global</td><td><span class="badge badge-success">Active</span></td>
+      <td class="row"><button class="btn btn-ghost btn-sm" onclick="owUserModal('Aarav Sharma','aarav@example.com','User')">View</button></td></tr>
+    <tr style="opacity:.7"><td>Meera Iyer</td><td>meera@example.com</td><td><span class="badge badge-muted">User</span></td><td class="muted">&mdash;</td><td><span class="badge badge-error">Deleted (soft)</span></td>
+      <td class="row"><button class="btn btn-ghost btn-sm" onclick="location.href='a10-danger-zone.html'">Restore via Danger Zone</button></td></tr>
+  </table>
+
+  <div class="toast-note mt-3">Soft delete (sets <code>is_deleted</code>) and restore are <b>Super Admin only</b> &mdash; see <a href="a10-danger-zone.html" style="color:var(--purple);font-weight:700">Danger Zone</a>.</div>
+
+  <div class="center mt-3"><button class="btn btn-secondary" onclick="owToast('Loading more')">Load more</button></div>
+</div>
+<script src="shared/app.js"></script>
+</body>
+</html>

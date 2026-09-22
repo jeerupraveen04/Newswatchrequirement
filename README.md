@@ -1,88 +1,187 @@
-# OneWayNews - News Listing Screen
+# NewsWatch — Requirements & UI/UX Documentation Repository
 
-A single-file HTML/CSS/JS prototype of a news listing screen with a
-full-screen, vertical scroll-snap experience for both desktop and mobile.
+> **This repository is NOT the final application.**
+> It is the complete, implementation-ready **requirements, UI/UX, flow, and
+> architecture documentation** for the NewsWatch platform. Once finalized, it
+> can be handed to an LLM or engineering team to build the **mobile app, web
+> application, backend, and database** exactly as specified.
 
-File: `newslistingscreen.html`
+---
 
-## Requirements
+## 1. What this project is
 
-### 1. General
-- Single self-contained `.html` file (inline CSS and JS, no build step).
-- Responsive: works on desktop and mobile browsers.
-- Brand colour palette based on purple (`--purple: #8a007a`) with light/dark
-  variants, plus neutral text, border and background tokens.
-- Clean typography using the `Inter` font stack.
+NewsWatch is a news platform with a fast, swipeable news-reading experience,
+category browsing, search, bookmarks, comments, notifications, and a
+reporter + admin content pipeline.
 
-### 2. Web Header
-- Fixed header at the top of the viewport.
-- Logo ("oneway news") with a custom CSS logo icon.
-- Desktop navigation: Home, Categories, Live TV, About.
-- Header actions: search box, Login button.
-- On mobile the header collapses to a solid purple bar with only the logo and
-  mobile icons (search / menu); nav, search box and login are hidden.
+This repo documents **what to build, how each page must look, how each page must
+behave, and how all pages/modules connect** — in enough detail that no design or
+product decision is left ambiguous.
 
-### 3. News Scroller
-- A full-height vertical scroller below the header.
-- Scroll-snap behaviour (`y mandatory`, `snap-stop: always`) so each article
-  fills the viewport and locks into place.
-- Smooth scrolling with hidden scrollbars.
-- One full-screen "page" per news article.
+### In scope
+- Functional requirements for every page (reader, reporter, admin).
+- UI/UX specs for **mobile app** and **web** with responsive rules.
+- Complete flow diagrams (authentication, browsing, reading, reporter, admin,
+  navigation, API/backend interaction).
+- Architecture docs (mobile, web, backend, database, API, auth, integrations).
+- Reference HTML/CSS prototypes for key pages.
+- Central README + per-page documentation + clear folder structure.
 
-### 4. News Article Page
-Each article must contain, in order:
-- **Hero image** with:
-  - Category badge (e.g. India, Sports, Business, Technology).
-  - Image counter (e.g. `1/12`).
-- **Content block** with:
-  - Article title (large, bold).
-  - Short summary paragraph.
-  - Meta row: author name, relative time (e.g. "2h ago"), view count.
-  - Actions row: Like (with count), Comments, Share, Save.
-  - Article body paragraphs.
-  - "Next News" card: thumbnail, label, next article title and arrow icon.
+### Out of scope
+- No production application code (this is spec only).
+- **No payments or subscription/paywall** — all content is free in v1.
 
-### 5. Next News Navigation
-- Clicking a "Next News" card scrolls to the corresponding article
-  (`goToNews(index)`).
-- Smooth scroll to the start of the target article.
+---
 
-### 6. Desktop Scroll Indicator
-- Fixed dot indicator on the right side.
-- Active article's dot is highlighted and elongated.
-- Dots update automatically as the user scrolls (IntersectionObserver,
-  threshold `0.65`).
+## 2. Target technology stack
 
-### 7. Keyboard Navigation
-- `ArrowDown` / `PageDown` moves to the next article.
-- `ArrowUp` / `PageUp` moves to the previous article.
-- Navigation clamps at the first and last article.
+| Layer | Technology |
+|---|---|
+| Mobile app | React Native (Expo) |
+| Web app | React (Next.js) |
+| Backend | Node.js + Express |
+| Database | PostgreSQL |
+| Media storage (images + video) | **Cloudflare R2** (Cloudflare CDN) |
+| Auth | JWT access + refresh tokens, OTP login, OAuth (Google/Apple) |
+| Push notifications | Firebase Cloud Messaging (FCM) |
+| Realtime | WebSocket / Socket.IO (live comments) |
+| Analytics | Firebase Analytics + backend events |
 
-### 8. Responsive Breakpoints
-- **Desktop**: default styles, centred article card (max-width `900px`) with
-  rounded corners and shadow, hero height `470px`.
-- **Mobile (`max-width: 768px`)**: purple header, edge-to-edge article with no
-  card shadow, hero height `300px`, reduced font sizes and spacing.
-- **Small phones (`max-width: 390px`)**: further reduced hero height (`270px`),
-  title and body font sizes.
+See [`docs/architecture/00-overview.md`](docs/architecture/00-overview.md) for the
+full architecture and [`docs/architecture/04-api.md`](docs/architecture/04-api.md)
+for the API contract.
 
-### 9. Content
-- Prototype includes 4 sample articles (India, Sports, Business, Technology).
-- Images are loaded from Unsplash.
+---
 
-## How to Use
-Open `newslistingscreen.html` directly in any modern browser.
+## 3. Roles
 
-## Deployment
-Static site is deployed to GitHub Pages via GitHub Actions.
+| Role (`users.role`) | Description |
+|---|---|
+| **Guest** | Unauthenticated. Can browse feed, read, search, open categories. |
+| **User** (`user`) | Normal user. Can like, comment, bookmark, follow, manage profile. |
+| **Reporter** (`reporter`) | Can add news. Creates and submits articles within assigned regions, tracks status. |
+| **Admin** (`admin`) | Approves/publishes news for a **specific region** (state → district → constituency → mandal). Manages users/reporters within scope. |
+| **Super Admin** (`super_admin`, God user) | Unrestricted. Can do anything any role can, plus: **soft-delete users** (`is_deleted=true`), **hard-delete articles**, manage **regions**, and update **app contact / advertisement details**. |
 
-- Workflow: `.github/workflows/deploy.yml`
-- Triggers on push to `main` (and manual run via `workflow_dispatch`).
-- The workflow copies `newslistingscreen.html` to `index.html` and publishes
-  the repository root as the site.
+> Full role matrix, region scoping, and deletion policy:
+> [`docs/architecture/08-roles-regions-and-deletion.md`](docs/architecture/08-roles-regions-and-deletion.md).
 
-### Setup
-1. Push this repository to GitHub.
-2. Go to **Settings → Pages** and set **Source** to **GitHub Actions**.
-3. Push to `main`; the site will be published at
-   `https://<username>.github.io/<repo>/`.
+---
+
+## 4. Repository structure
+
+```
+Newswatchrequirement/
+├── README.md                     # This file — project overview
+├── newslistingscreen.html        # Existing combined prototype (legacy location)
+├── docs/
+│   ├── 00-overview.md            # Goals, scope, glossary, personas
+│   ├── 01-page-index.md          # Master list of all pages + links
+│   ├── 02-conventions.md         # Doc format, naming, requirement IDs
+│   ├── 03-page-template.md       # Template every page doc follows
+│   ├── flows/                    # Flow diagrams (all connectivity)
+│   │   ├── 00-index.md
+│   │   ├── 01-authentication-flow.md
+│   │   ├── 02-user-flow.md
+│   │   ├── 03-news-browsing-flow.md
+│   │   ├── 04-news-reading-flow.md
+│   │   ├── 05-reporter-flow.md
+│   │   ├── 06-admin-flow.md
+│   │   ├── 07-navigation-map.md
+│   │   └── 08-api-interaction-flow.md
+│   ├── architecture/
+│   │   ├── 00-overview.md
+│   │   ├── 01-mobile-architecture.md
+│   │   ├── 02-web-architecture.md
+│   │   ├── 03-backend-architecture.md
+│   │   ├── 04-api.md             # REST API contract
+│   │   ├── 05-database.md        # Schema + ERD
+│   │   ├── 06-auth-and-authorization.md
+│   │   ├── 08-roles-regions-and-deletion.md  # Roles, region scope, deletion policy
+│   │   └── 07-third-party-integrations.md
+│   ├── design-system/
+│   │   ├── 00-tokens.md          # Colors, spacing, radius, shadows
+│   │   ├── 01-typography.md
+│   │   └── 02-components.md      # Shared component inventory
+│   └── pages/                    # One combined doc per page
+│       ├── ...                   # See docs/01-page-index.md
+└── prototypes/
+    ├── README.md                 # Prototype guide
+    ├── pages/                    # Clickable skeleton pages (start here)
+    │   ├── shared/               # app.css (tokens) + app.js (chrome/interactions)
+    │   ├── index / s02-navigation-shell.html  # Links to every screen
+    │   ├── p01…p21 / r01…r05 / a01…a10 / s01–s02   # P14 removed (retired)
+    ├── web/                      # Original standalone web prototype
+    └── mobile/                   # Mobile-specific prototypes (to add)
+```
+
+---
+
+## 5. How to read this repo
+
+1. Start with [`docs/00-overview.md`](docs/00-overview.md) for goals, personas,
+   and glossary.
+2. Read [`docs/01-page-index.md`](docs/01-page-index.md) to see every page and
+   open the page you care about.
+3. Read the relevant flow in [`docs/flows/`](docs/flows/00-index.md) to
+   understand how pages connect.
+4. Read [`docs/architecture/`](docs/architecture/00-overview.md) before
+   implementing backend/database.
+5. Use [`docs/design-system/`](docs/design-system/00-tokens.md) for visual
+   consistency.
+6. Reference prototypes in [`prototypes/`](prototypes/README.md) for exact UI.
+   Open [`prototypes/pages/s02-navigation-shell.html`](prototypes/pages/s02-navigation-shell.html)
+   to click through every screen.
+
+---
+
+## 5b. Clickable skeleton prototype
+
+A full set of **linked HTML skeleton pages** implementing every documented
+screen lives in [`prototypes/pages/`](prototypes/pages/). All pages share one
+design-system stylesheet (`shared/app.css`) and one script (`shared/app.js`)
+that injects the header, mobile bottom tabs, or admin/super-admin sidebar.
+Interactions (scroll-snap scroller, likes, saves, tabs, OTP inputs) are wired
+end-to-end. It includes dedicated screens for the region hierarchy, app contact
+settings, and the super-admin danger zone (soft-delete users / hard-delete
+articles). The current set covers **37 pages** — P01–P13 and P15–P21 (reader),
+R01–R05, A01–A10, S01–S02; **P14 is retired/removed**.
+
+---
+
+## 6. How to use this repo with an LLM
+
+Prompt pattern:
+
+> "Using the documentation in this repository, implement the NewsWatch
+> [mobile app / web app / backend / database]. Follow
+> `docs/architecture/`, `docs/flows/`, and each page document in `docs/pages/`
+> exactly. Match the UI in `prototypes/`. Do not add features not documented."
+
+Each page doc contains: Purpose, UI structure, Features, User flow,
+Dependencies, API/data requirements, and Navigation to other pages — everything
+needed to build that page without further clarification.
+
+---
+
+## 7. Requirement ID convention
+
+`REQ-<AREA>-<n>` (e.g. `REQ-AUTH-003`). Areas: `AUTH`, `FEED`, `READ`,
+`CAT`, `SEARCH`, `BOOK`, `NOTIF`, `COMMENT`, `PROF`, `SET`, `REP`,
+`ADM`, `SYS`. See [`docs/02-conventions.md`](docs/02-conventions.md).
+
+---
+
+## 8. Status
+
+| Section | Status |
+|---|---|
+| Overview & conventions | ✅ |
+| Page index | ✅ |
+| Reader/Public pages | ✅ |
+| Reporter pages | ✅ |
+| Admin pages | ✅ |
+| Flows | ✅ |
+| Architecture | ✅ |
+| Design system | ✅ |
+| Prototypes | ✅ 37 linked skeleton pages (P14 removed) |

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Reporter Application</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-page="reporter" data-app="true">
+<div class="page-wrap">
+  <div class="page" style="max-width:620px">
+    <a href="p18-profile.html" class="small" style="color:var(--muted)">&larr; Back to profile</a>
+    <h1 class="page-title mt-2">Become a reporter</h1>
+    <p class="page-sub">Apply to publish stories on NewsWatch.</p>
+
+    <div class="toast-note mb-3" style="background:rgba(217,119,6,.12);border-color:rgba(217,119,6,.3);color:var(--warning)">
+      Status: <b>Pending review</b> &middot; submitted 1d ago. You'll be notified once an admin reviews your application.
+    </div>
+
+    <form onsubmit="return owSubmit(event)">
+      <div class="card card-pad mb-3">
+        <div class="field"><label>Full name</label><input class="input" value="Rahul Verma" /></div>
+        <div class="field"><label>Phone</label><input class="input" value="+91 90000 12345" /></div>
+        <div class="field"><label>Bio</label><textarea class="textarea" placeholder="Tell us about your experience"></textarea></div>
+        <div class="field"><label>Areas of expertise</label>
+          <div class="row wrap">
+            <button type="button" class="chip active">Politics</button>
+            <button type="button" class="chip">Business</button>
+            <button type="button" class="chip">Technology</button>
+          </div>
+        </div>
+        <div class="field"><label>Sample article links</label><textarea class="textarea" placeholder="Paste links to your published work"></textarea></div>
+        <div class="field"><label>Verification ID</label><input class="input" placeholder="Press card / ID number" /></div>
+      </div>
+      <div class="row">
+        <button class="btn btn-primary" type="submit">Submit application</button>
+        <a class="btn btn-ghost" href="r01-reporter-dashboard.html">Demo: view dashboard</a>
+      </div>
+    </form>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+</body>
+</html>

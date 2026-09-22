@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Reporter Dashboard</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-page="reporter" data-app="true">
+<div class="page-wrap">
+  <div class="page">
+    <div class="row-between mb-3">
+      <div>
+        <h1 class="page-title" style="margin-bottom:2px">Reporter dashboard</h1>
+        <p class="page-sub" style="margin-bottom:0">Welcome back, Rahul.</p>
+      </div>
+      <a class="btn btn-primary" href="r02-article-composer.html">+ New article</a>
+    </div>
+
+    <div class="grid grid-4 mb-3">
+      <div class="kpi"><div class="num">32</div><div class="lbl">Published</div></div>
+      <div class="kpi"><div class="num" style="color:var(--warning)">3</div><div class="lbl">Pending review</div></div>
+      <div class="kpi"><div class="num" style="color:var(--muted)">2</div><div class="lbl">Drafts</div></div>
+      <div class="kpi"><div class="num">248K</div><div class="lbl">Total views</div></div>
+    </div>
+
+    <div class="toast-note mb-3" style="background:rgba(220,38,38,.1);border-color:rgba(220,38,38,.25);color:var(--error)">
+      1 article was rejected. <a href="r03-my-articles.html" style="color:var(--error);font-weight:700">Review feedback &#8594;</a>
+    </div>
+
+    <div class="row-between mb-2">
+      <div class="section-title" style="margin-bottom:0">Recent articles</div>
+      <a class="small" href="r03-my-articles.html" style="color:var(--purple);font-weight:700">View all</a>
+    </div>
+    <div class="list-row">
+      <div class="grow"><a href="r02-article-composer.html"><div class="title">State Budget 2026: Key Allocations Explained</div></a><div class="sub">Draft &middot; updated 20m ago</div></div>
+      <span class="badge badge-muted">Draft</span>
+    </div>
+    <div class="list-row">
+      <div class="grow"><a href="r03-my-articles.html"><div class="title">Metro Phase 3 Approved By Cabinet</div></a><div class="sub">Submitted 2h ago &middot; awaiting review</div></div>
+      <span class="badge badge-warning">Pending</span>
+    </div>
+    <div class="list-row">
+      <div class="grow"><a href="p09-article-detail.html"><div class="title">New Coastal Highway Opens To Traffic</div></a><div class="sub">Published 1d ago &middot; 12.4K views</div></div>
+      <span class="badge badge-success">Published</span>
+    </div>
+    <div class="list-row">
+      <div class="grow"><a href="r03-my-articles.html"><div class="title">Tech Park Expansion Delayed Again</div></a><div class="sub">Rejected &middot; needs sources</div></div>
+      <span class="badge badge-error">Rejected</span>
+    </div>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+</body>
+</html>

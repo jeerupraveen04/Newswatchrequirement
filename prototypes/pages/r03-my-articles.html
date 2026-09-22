@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — My Articles</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-page="reporter" data-app="true">
+<div class="page-wrap">
+  <div class="page">
+    <div class="row-between mb-2">
+      <h1 class="page-title" style="margin-bottom:0">My articles</h1>
+      <a class="btn btn-primary btn-sm" href="r02-article-composer.html">+ New</a>
+    </div>
+    <p class="page-sub">Track every story from draft to published.</p>
+
+    <div class="row mb-3">
+      <button class="chip active">All</button>
+      <button class="chip">Draft</button>
+      <button class="chip">Pending</button>
+      <button class="chip">Published</button>
+      <button class="chip">Rejected</button>
+    </div>
+
+    <div class="list-row">
+      <div class="grow"><a href="r02-article-composer.html"><div class="title">State Budget 2026: Key Allocations Explained</div></a><div class="sub">Updated 20m ago</div></div>
+      <span class="badge badge-muted">Draft</span>
+      <div class="end"><button class="btn btn-ghost btn-sm" onclick="owToast('Edit')">Edit</button></div>
+    </div>
+    <div class="list-row">
+      <div class="grow"><div class="title">Metro Phase 3 Approved By Cabinet</div><div class="sub">Submitted 2h ago</div></div>
+      <span class="badge badge-warning">Pending</span>
+      <div class="end"><button class="btn btn-ghost btn-sm" onclick="owToast('Viewing')">View</button></div>
+    </div>
+    <div class="list-row">
+      <div class="grow"><a href="p09-article-detail.html"><div class="title">New Coastal Highway Opens To Traffic</div></a><div class="sub">Published 1d ago &middot; 12.4K views</div></div>
+      <span class="badge badge-success">Published</span>
+      <div class="end"><button class="btn btn-ghost btn-sm" onclick="owToast('View live')">View</button></div>
+    </div>
+    <div class="list-row" style="border-color:rgba(220,38,38,.4);background:rgba(220,38,38,.04)">
+      <div class="grow">
+        <div class="title">Tech Park Expansion Delayed Again</div>
+        <div class="sub" style="color:var(--error)">Rejected: "Please add at least two verifiable sources."</div>
+      </div>
+      <span class="badge badge-error">Rejected</span>
+      <div class="end"><a class="btn btn-secondary btn-sm" href="r02-article-composer.html">Resubmit</a></div>
+    </div>
+
+    <div class="center mt-3"><a class="btn btn-secondary" href="r01-reporter-dashboard.html">Back to dashboard</a></div>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+</body>
+</html>

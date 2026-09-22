@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — System States</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-page="system" data-app="true">
+<div class="page-wrap">
+  <div class="page">
+    <h1 class="page-title">System states</h1>
+    <p class="page-sub">Reference for loading, empty, error and offline states.</p>
+
+    <div class="section-title">Loading</div>
+    <div class="card card-pad mb-3">
+      <div class="skeleton skeleton-line" style="width:70%"></div>
+      <div class="skeleton skeleton-line" style="width:90%"></div>
+      <div class="skeleton skeleton-line" style="width:50%"></div>
+      <div class="skeleton" style="height:160px;margin-top:12px"></div>
+    </div>
+
+    <div class="section-title">Offline banner</div>
+    <div class="toast-note mb-3" style="background:rgba(217,119,6,.12);border-color:rgba(217,119,6,.3);color:var(--warning)">You're offline. Showing saved content.</div>
+
+    <div class="section-title">Empty</div>
+    <div class="empty mb-3"><div class="big">&#128240;</div><div>Nothing here yet.</div><a class="btn btn-primary mt-2" href="p07-home-feed.html">Go to feed</a></div>
+
+    <div class="section-title">Error</div>
+    <div class="empty mb-3"><div class="big">&#9888;</div><div>Something went wrong.</div><button class="btn btn-secondary mt-2" onclick="owToast('Retrying...')">Retry</button></div>
+
+    <div class="section-title">404 / Maintenance</div>
+    <div class="card card-pad center mb-3">
+      <div style="font-size:54px;font-weight:800;color:var(--purple)">404</div>
+      <p class="muted mt-1">The page you're looking for doesn't exist.</p>
+      <a class="btn btn-primary mt-2" href="p07-home-feed.html">Back home</a>
+    </div>
+    <div class="card card-pad center">
+      <div style="font-size:44px">&#128736;</div>
+      <b>Under maintenance</b>
+      <p class="muted small mt-1">We'll be back shortly. Thanks for your patience.</p>
+    </div>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+</body>
+</html>

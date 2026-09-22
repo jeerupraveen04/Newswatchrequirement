@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Sports</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-page="categories" data-app="true">
+<div class="page-wrap">
+  <div class="page">
+    <a href="p10-categories.html" class="small" style="color:var(--muted)">&larr; All categories</a>
+    <div class="row-between mt-2 mb-3">
+      <div>
+        <h1 class="page-title" style="margin-bottom:2px">Sports</h1>
+        <p class="page-sub" style="margin-bottom:0">96 articles</p>
+      </div>
+      <button class="btn btn-secondary" onclick="owToggle(this);owToast('Now following Sports')">Follow</button>
+    </div>
+
+    <div class="row mb-3">
+      <button class="chip active">Latest</button>
+      <button class="chip">Trending</button>
+      <button class="chip">Most read</button>
+    </div>
+
+    <article class="list-row">
+      <img class="thumb" src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=500&q=80" alt="" />
+      <div class="grow"><a href="p09-article-detail.html"><div class="title">India vs Australia 3rd ODI: Rohit, Kohli Make It Count</div></a><div class="sub">4h ago &middot; 18.2K views</div></div>
+    </article>
+    <article class="list-row">
+      <img class="thumb" src="https://images.unsplash.com/photo-1521412644187-c49fa049e84d?auto=format&fit=crop&w=500&q=80" alt="" />
+      <div class="grow"><a href="p09-article-detail.html"><div class="title">Domestic Season Opens With New Format Changes</div></a><div class="sub">7h ago &middot; 9.1K views</div></div>
+    </article>
+    <article class="list-row">
+      <img class="thumb" src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=500&q=80" alt="" />
+      <div class="grow"><a href="p09-article-detail.html"><div class="title">National Athletics Meet Sets New Records</div></a><div class="sub">1d ago &middot; 6.4K views</div></div>
+    </article>
+
+    <div class="center mt-3"><a class="btn btn-secondary" href="p07-home-feed.html">Load more</a></div>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+</body>
+</html>

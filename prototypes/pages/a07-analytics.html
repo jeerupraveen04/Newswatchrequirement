@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Analytics</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-admin="true" data-page="analytics">
+<div class="admin-main">
+  <div class="row-between mb-2">
+    <h1 class="page-title" style="margin-bottom:0">Analytics</h1>
+    <div class="row">
+      <button class="btn btn-secondary btn-sm" onclick="owDateRangeModal()">Last 7 days &#9662;</button>
+      <button class="btn btn-secondary btn-sm" onclick="owToast('Exporting CSV')">Export CSV</button>
+    </div>
+  </div>
+  <p class="page-sub">Traffic, engagement and reporter performance.</p>
+
+  <div class="grid grid-4 mb-3">
+    <div class="kpi"><div class="num">412K</div><div class="lbl">Page views</div></div>
+    <div class="kpi"><div class="num">88K</div><div class="lbl">Unique readers</div></div>
+    <div class="kpi"><div class="num">3m 42s</div><div class="lbl">Avg read time</div></div>
+    <div class="kpi"><div class="num">64%</div><div class="lbl">Scroll depth</div></div>
+  </div>
+
+  <div class="grid grid-2 mb-3">
+    <div class="card card-pad">
+      <div class="section-title">Views over time</div>
+      <div style="height:180px;background:linear-gradient(180deg,var(--purple-light),#fff);border-radius:var(--radius-md);display:flex;align-items:flex-end;gap:6px;padding:12px">
+        <div style="flex:1;height:35%;background:var(--purple);border-radius:4px 4px 0 0"></div>
+        <div style="flex:1;height:55%;background:var(--purple);border-radius:4px 4px 0 0"></div>
+        <div style="flex:1;height:45%;background:var(--purple);border-radius:4px 4px 0 0"></div>
+        <div style="flex:1;height:75%;background:var(--purple);border-radius:4px 4px 0 0"></div>
+        <div style="flex:1;height:62%;background:var(--purple);border-radius:4px 4px 0 0"></div>
+        <div style="flex:1;height:88%;background:var(--purple);border-radius:4px 4px 0 0"></div>
+        <div style="flex:1;height:70%;background:var(--purple);border-radius:4px 4px 0 0"></div>
+      </div>
+    </div>
+    <div class="card card-pad">
+      <div class="section-title">Engagement</div>
+      <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)"><span>Likes</span><b>24.1K</b></div>
+      <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)"><span>Comments</span><b>6.8K</b></div>
+      <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)"><span>Shares</span><b>3.2K</b></div>
+      <div style="display:flex;justify-content:space-between;padding:12px 0"><span>Bookmarks</span><b>9.5K</b></div>
+    </div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card card-pad">
+      <div class="section-title">Top articles</div>
+      <table class="table">
+        <tr><th>Title</th><th>Views</th></tr>
+        <tr><td>PM Modi Inaugurates Projects</td><td>24.8K</td></tr>
+        <tr><td>India vs Australia 3rd ODI</td><td>18.2K</td></tr>
+        <tr><td>Sensex Rises 700 Points</td><td>15.4K</td></tr>
+      </table>
+    </div>
+    <div class="card card-pad">
+      <div class="section-title">Reporter performance</div>
+      <table class="table">
+        <tr><th>Reporter</th><th>Published</th><th>Views</th></tr>
+        <tr><td>Rahul Verma</td><td>32</td><td>248K</td></tr>
+        <tr><td>Neha Das</td><td>21</td><td>150K</td></tr>
+        <tr><td>Vikram Rao</td><td>18</td><td>96K</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+</body>
+</html>

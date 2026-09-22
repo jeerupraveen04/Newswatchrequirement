@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Admin Login</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-chrome="none">
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#171717;padding:24px">
+  <div class="card card-pad" style="width:100%;max-width:400px">
+    <div class="row mb-2"><span class="logo-icon"></span><b style="font-size:18px">newswatch admin</b></div>
+    <h1 style="font-size:22px;font-weight:800;margin-bottom:4px">Admin sign in</h1>
+    <p class="muted small mb-3">Restricted to admin &amp; super admin staff accounts.</p>
+    <form onsubmit="owSubmit(event);setTimeout(function(){location.href='a02-admin-dashboard.html'},400);return false;">
+      <div class="field"><label>Email</label><input class="input" type="email" placeholder="admin@newswatch.com" /></div>
+      <div class="field"><label>Password</label><input class="input" type="password" placeholder="••••••••" /></div>
+      <div class="field"><label>2FA code (optional)</label><input class="input" placeholder="000000" /></div>
+      <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+    </form>
+    <p class="small muted center mt-2">Role is resolved on login. Super admins unlock the God-mode sidebar.</p>
+    <p class="center small mt-2"><a href="p07-home-feed.html" style="color:var(--purple);font-weight:700">&larr; Back to site</a></p>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+</body>
+</html>

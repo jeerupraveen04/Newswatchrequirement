@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Login</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-chrome="none">
+<div class="auth-wrap">
+  <div class="auth-side">
+    <span class="logo-icon" style="background:#fff"></span>
+    <h2 class="mt-3">Welcome back to<br />newswatch</h2>
+    <p>Log in to save articles, comment and follow your favourite topics.</p>
+  </div>
+  <div class="auth-main">
+    <div class="auth-card">
+      <a href="p07-home-feed.html" class="small" style="color:var(--muted)">&larr; Back</a>
+      <h1 class="mt-2">Log in</h1>
+      <p class="lead">Use your email or continue with a social account.</p>
+
+      <div class="row mb-2">
+        <button class="chip active" onclick="owTab(this)">Email</button>
+        <button class="chip" onclick="owTab(this)">Phone OTP</button>
+      </div>
+
+      <form onsubmit="return owSubmit(event)">
+        <div class="field">
+          <label>Email address</label>
+          <input class="input" type="email" placeholder="you@example.com" />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input class="input" type="password" placeholder="••••••••" />
+        </div>
+        <div class="row-between mb-2">
+          <label class="small row" style="gap:7px"><input type="checkbox" /> Remember me</label>
+          <a class="small" href="p06-forgot-password.html" style="color:var(--purple);font-weight:700">Forgot password?</a>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Log in</button>
+      </form>
+
+      <div class="divider-text">or continue with</div>
+      <div class="oauth-row">
+        <button class="btn" onclick="owSubmit(event)">Google</button>
+        <button class="btn" onclick="owSubmit(event)">Apple</button>
+      </div>
+
+      <p class="center mt-3 small">New here? <a href="p04-signup.html" style="color:var(--purple);font-weight:700">Create an account</a></p>
+    </div>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+<script>function owTab(el){[...el.parentNode.children].forEach(c=>c.classList.remove("active"));el.classList.add("active");}</script>
+</body>
+</html>

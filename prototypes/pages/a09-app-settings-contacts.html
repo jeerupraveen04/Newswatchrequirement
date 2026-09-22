@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — App & Ad Settings (Super Admin)</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-admin="true" data-super="true" data-page="appsettings">
+<div class="admin-main">
+  <div class="row-between mb-2">
+    <div>
+      <h1 class="page-title" style="margin-bottom:2px">App contact &amp; advertisement settings</h1>
+      <p class="page-sub" style="margin-bottom:0">Public contact and ad-sales details &middot; <b>Super Admin only</b></p>
+    </div>
+    <button class="btn btn-primary" onclick="owSubmit(event)">Save changes</button>
+  </div>
+
+  <div class="toast-note mb-3">All changes are versioned and audited (actor, before, after). Public fields appear on the About/Contact page.</div>
+
+  <div class="grid grid-2" style="grid-template-columns:1.4fr 1fr;align-items:start">
+    <div>
+      <div class="card card-pad mb-3">
+        <div class="section-title">Public contact</div>
+        <div class="field"><label>Support email <span class="badge badge-success" style="margin-left:6px">Public</span></label><input class="input" value="support@newswatch.com" /></div>
+        <div class="field"><label>Support phone <span class="badge badge-success" style="margin-left:6px">Public</span></label><input class="input" value="+91 1800 000 000" /></div>
+        <div class="field"><label>WhatsApp <span class="badge badge-success" style="margin-left:6px">Public</span></label><input class="input" value="+91 90000 00000" /></div>
+        <div class="field"><label>Office address <span class="badge badge-success" style="margin-left:6px">Public</span></label><textarea class="textarea">NewsWatch Media, 4th Floor, Banjara Hills, Hyderabad</textarea></div>
+      </div>
+
+      <div class="card card-pad mb-3">
+        <div class="section-title">Advertisement / ad sales</div>
+        <div class="field"><label>Ad-sales email <span class="badge badge-success" style="margin-left:6px">Public</span></label><input class="input" value="ads@newswatch.com" /></div>
+        <div class="field"><label>Ad-sales phone <span class="badge badge-success" style="margin-left:6px">Public</span></label><input class="input" value="+91 90000 11111" /></div>
+        <div class="field"><label>Ad rate card URL</label><input class="input" value="https://newswatch.com/advertise" /></div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="section-title">Social links</div>
+        <div class="field"><label>X / Twitter</label><input class="input" value="https://x.com/newswatch" /></div>
+        <div class="field"><label>Facebook</label><input class="input" value="https://facebook.com/newswatch" /></div>
+        <div class="field"><label>YouTube</label><input class="input" value="https://youtube.com/@newswatch" /></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card card-pad mb-3">
+        <div class="section-title">Live preview</div>
+        <div style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px">
+          <div class="row mb-2"><span class="logo-icon"></span><b>Contact NewsWatch</b></div>
+          <div class="small" style="line-height:1.9">
+            &#9993; support@newswatch.com<br />
+            &#9743; +91 1800 000 000<br />
+            &#128241; WhatsApp +91 90000 00000<br />
+            &#127968; Banjara Hills, Hyderabad
+          </div>
+          <hr class="divider" />
+          <b class="small">Advertise with us</b>
+          <div class="small muted">ads@newswatch.com</div>
+        </div>
+      </div>
+
+      <div class="card card-pad">
+        <div class="section-title">Version history</div>
+        <div class="list-row"><div class="grow"><div class="title">support@newswatch.com</div><div class="sub">updated 2d ago by super admin</div></div><button class="btn btn-ghost btn-sm" onclick="owToast('Restored')">Restore</button></div>
+        <div class="list-row"><div class="grow"><div class="title">ads@newswatch.com</div><div class="sub">updated 1w ago by super admin</div></div><button class="btn btn-ghost btn-sm" onclick="owToast('Restored')">Restore</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+</body>
+</html>

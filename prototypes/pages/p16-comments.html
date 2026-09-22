@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Comments</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-page="comments">
+<div class="page-wrap">
+  <div class="page">
+    <a href="p09-article-detail.html" class="small" style="color:var(--muted)">&larr; Back to article</a>
+    <h1 class="page-title mt-2">Comments</h1>
+    <p class="page-sub">2 comments &middot; newest first</p>
+
+    <div class="row mb-3">
+      <button class="chip active">Newest</button>
+      <button class="chip">Top</button>
+    </div>
+
+    <div class="card card-pad mb-3">
+      <div class="row" style="align-items:flex-start">
+        <span class="avatar"></span>
+        <input class="textarea" placeholder="Add a comment..." style="min-height:52px"></input>
+      </div>
+      <div class="row mt-2" style="justify-content:flex-end">
+        <button class="btn btn-primary btn-sm" onclick="owSubmit(event)">Post</button>
+      </div>
+    </div>
+
+    <div class="comment">
+      <span class="avatar"></span>
+      <div class="grow">
+        <div class="c-meta"><b style="color:var(--text)">Aarav</b> &middot; 1h ago</div>
+        <div class="c-text">Great coverage. The infrastructure push should really help connectivity in the region.</div>
+        <div class="c-actions"><span>&#9825; 24</span><span>Reply</span><span>Report</span></div>
+      </div>
+    </div>
+    <div class="comment reply">
+      <span class="avatar" style="background:var(--muted)"></span>
+      <div class="grow">
+        <div class="c-meta"><b style="color:var(--text)">NewsWatch</b> <span class="badge badge-purple" style="padding:2px 6px">Author</span> &middot; 45m ago</div>
+        <div class="c-text">Thanks for reading! More updates coming this week.</div>
+        <div class="c-actions"><span>&#9825; 8</span><span>Reply</span></div>
+      </div>
+    </div>
+    <div class="comment">
+      <span class="avatar" style="background:#0a7a8a"></span>
+      <div class="grow">
+        <div class="c-meta"><b style="color:var(--text)">Meera</b> &middot; 20m ago</div>
+        <div class="c-text">Would love a follow-up on the funding details.</div>
+        <div class="c-actions"><span>&#9825; 3</span><span>Reply</span><span>Report</span></div>
+      </div>
+    </div>
+
+    <div class="toast-note mt-3">Live comments update in real time via Socket.IO.</div>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+</body>
+</html>

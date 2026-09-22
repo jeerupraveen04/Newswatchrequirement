@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Article Composer</title>
+<link rel="stylesheet" href="shared/app.css" />
+<style>
+  .uploader { border:2px dashed var(--border); border-radius:var(--radius-lg); padding:30px; text-align:center; color:var(--muted); cursor:pointer; }
+  .uploader:hover { border-color:var(--purple); color:var(--purple); background:var(--purple-light); }
+
+  .rt-toolbar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:8px; border:1px solid var(--border); border-bottom:none; border-radius:var(--radius-md) var(--radius-md) 0 0; background:#fafafa; }
+  .rt-toolbar button { border:1px solid var(--border); background:#fff; border-radius:6px; min-width:32px; height:32px; cursor:pointer; font-size:14px; font-weight:700; color:var(--text); }
+  .rt-toolbar button:hover { border-color:var(--purple); color:var(--purple); }
+  .rt-toolbar button.on { background:var(--purple); border-color:var(--purple); color:#fff; }
+  .rt-sep { width:1px; height:22px; background:var(--border); margin:0 4px; }
+  .rt-editor { border:1px solid var(--border); border-radius:0 0 var(--radius-md) var(--radius-md); min-height:200px; padding:14px; font-size:15px; line-height:1.7; outline:none; }
+  .rt-editor:focus { border-color:var(--purple); box-shadow:0 0 0 3px var(--purple-light); }
+  .rt-editor h2 { font-size:22px; margin:10px 0 6px; }
+  .rt-editor blockquote { border-left:3px solid var(--purple); padding-left:12px; color:var(--muted-strong); margin:10px 0; }
+
+  .swatches { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .swatch { width:28px; height:28px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1px var(--border); cursor:pointer; }
+  .swatch.active { box-shadow:0 0 0 2px var(--purple); }
+  .size-btns { display:flex; gap:6px; }
+  .size-btns button { border:1px solid var(--border); background:#fff; border-radius:6px; padding:6px 12px; cursor:pointer; font-weight:700; }
+  .size-btns button.active { background:var(--purple); color:#fff; border-color:var(--purple); }
+
+  .preview-headline { font-weight:800; line-height:1.15; transition:color .15s, font-size .15s; }
+  .preview-desc { line-height:1.55; transition:color .15s, font-size .15s; color:var(--muted-strong); }
+
+  .tpl-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+  .tpl { border:2px solid var(--border); border-radius:var(--radius-md); overflow:hidden; cursor:pointer; text-align:center; }
+  .tpl.active { border-color:var(--purple); box-shadow:0 0 0 2px var(--purple-light); }
+  .tpl .cap { font-size:10px; font-weight:700; padding:5px 2px; }
+  .tpl .mini { height:56px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:800; color:#fff; text-align:center; padding:4px; }
+  @media (max-width:768px){ .tpl-grid{grid-template-columns:repeat(2,1fr)} }
+</style>
+</head>
+<body data-page="reporter" data-app="true">
+<div class="page-wrap">
+  <div class="page" style="max-width:900px">
+    <div class="row-between mb-3">
+      <div>
+        <a href="r01-reporter-dashboard.html" class="small" style="color:var(--muted)">&larr; Dashboard</a>
+        <h1 class="page-title" style="margin-bottom:0">New article</h1>
+      </div>
+      <span class="badge badge-muted">Draft saved 20m ago</span>
+    </div>
+
+    <div class="card card-pad mb-3" style="background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.2)">
+      <b style="color:var(--error)">Admin feedback</b>
+      <p class="small mt-1">"Please add at least two verifiable sources before resubmitting."</p>
+    </div>
+
+    <form onsubmit="return owSubmit(event)">
+      <!-- HEADLINE + STYLING -->
+      <div class="card card-pad mb-3">
+        <div class="field"><label>Headline / Title <span class="badge badge-purple" style="margin-left:6px">Required</span></label>
+          <input class="input" id="fTitle" placeholder="Article headline"
+                 oninput="document.getElementById('pH').textContent=this.value || 'Your headline appears here';" />
+        </div>
+
+        <div class="section-title" style="font-size:14px">Headline style</div>
+        <div class="field">
+          <label>Text colour</label>
+          <div class="swatches" id="hColors">
+            <span class="swatch active" data-c="#171717" style="background:#171717" onclick="pickColor(this,'h')"></span>
+            <span class="swatch" data-c="#8a007a" style="background:#8a007a" onclick="pickColor(this,'h')"></span>
+            <span class="swatch" data-c="#dc2626" style="background:#dc2626" onclick="pickColor(this,'h')"></span>
+            <span class="swatch" data-c="#2563eb" style="background:#2563eb" onclick="pickColor(this,'h')"></span>
+            <span class="swatch" data-c="#16a34a" style="background:#16a34a" onclick="pickColor(this,'h')"></span>
+            <span class="swatch" data-c="#d97706" style="background:#d97706" onclick="pickColor(this,'h')"></span>
+            <input type="color" value="#171717" title="Custom colour" style="width:34px;height:30px;border:1px solid var(--border);border-radius:6px;background:#fff" oninput="setColor('h',this.value)" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Font size</label>
+          <div class="size-btns" id="hSizes">
+            <button type="button" onclick="pickSize(this,'h',22)">S</button>
+            <button type="button" class="active" onclick="pickSize(this,'h',30)">M</button>
+            <button type="button" onclick="pickSize(this,'h',38)">L</button>
+            <button type="button" onclick="pickSize(this,'h',46)">XL</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DESCRIPTION + STYLING -->
+      <div class="card card-pad mb-3">
+        <div class="field"><label>Description / Summary</label>
+          <textarea class="textarea" id="fDesc" placeholder="Short description shown in feeds and posters"
+            oninput="document.getElementById('pD').textContent=this.value || 'Your description appears here.'; document.getElementById('dCount').textContent=this.value.length+'/300';"></textarea>
+          <div class="hint"><span id="dCount">0/300</span></div>
+        </div>
+
+        <div class="section-title" style="font-size:14px">Description style</div>
+        <div class="field">
+          <label>Text colour</label>
+          <div class="swatches" id="dColors">
+            <span class="swatch" data-c="#555555" style="background:#555555" onclick="pickColor(this,'d')"></span>
+            <span class="swatch active" data-c="#737373" style="background:#737373" onclick="pickColor(this,'d')"></span>
+            <span class="swatch" data-c="#171717" style="background:#171717" onclick="pickColor(this,'d')"></span>
+            <span class="swatch" data-c="#8a007a" style="background:#8a007a" onclick="pickColor(this,'d')"></span>
+            <span class="swatch" data-c="#62005a" style="background:#62005a" onclick="pickColor(this,'d')"></span>
+            <input type="color" value="#737373" title="Custom colour" style="width:34px;height:30px;border:1px solid var(--border);border-radius:6px;background:#fff" oninput="setColor('d',this.value)" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Font size</label>
+          <div class="size-btns" id="dSizes">
+            <button type="button" onclick="pickSize(this,'d',13)">S</button>
+            <button type="button" class="active" onclick="pickSize(this,'d',15)">M</button>
+            <button type="button" onclick="pickSize(this,'d',18)">L</button>
+            <button type="button" onclick="pickSize(this,'d',22)">XL</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIVE PREVIEW -->
+      <div class="card card-pad mb-3">
+        <div class="row-between mb-2">
+          <div class="section-title" style="margin-bottom:0">Live preview</div>
+          <span class="small muted">Rich text &amp; styling</span>
+        </div>
+        <div style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px">
+          <span class="badge badge-purple mb-2">India</span>
+          <div class="preview-headline" id="pH" style="color:#171717;font-size:30px">Your headline appears here</div>
+          <div class="preview-desc" id="pD" style="color:#737373;font-size:15px;margin-top:8px">Your description appears here.</div>
+        </div>
+      </div>
+
+      <!-- BODY RICH TEXT -->
+      <div class="card card-pad mb-3">
+        <div class="field" style="margin-bottom:10px"><label>Body <span class="badge badge-purple" style="margin-left:6px">Required</span></label></div>
+        <div class="rt-toolbar">
+          <button type="button" onclick="fmt('bold')" title="Bold"><b>B</b></button>
+          <button type="button" onclick="fmt('italic')" title="Italic"><i>I</i></button>
+          <button type="button" onclick="fmt('underline')" title="Underline"><u>U</u></button>
+          <span class="rt-sep"></span>
+          <button type="button" onclick="fmt('formatBlock','H2')">H2</button>
+          <button type="button" onclick="fmt('formatBlock','H3')">H3</button>
+          <button type="button" onclick="fmt('insertUnorderedList')">&#8226; List</button>
+          <button type="button" onclick="fmt('insertOrderedList')">1. List</button>
+          <button type="button" onclick="fmt('formatBlock','BLOCKQUOTE')">&#10078;</button>
+          <span class="rt-sep"></span>
+          <input type="color" value="#8a007a" title="Text colour" style="width:34px;height:30px;border:1px solid var(--border);border-radius:6px;background:#fff" onchange="fmt('foreColor',this.value)" />
+          <input type="color" value="#f7eaf6" title="Highlight" style="width:34px;height:30px;border:1px solid var(--border);border-radius:6px;background:#fff" onchange="fmt('hiliteColor',this.value)" />
+          <span class="rt-sep"></span>
+          <button type="button" onclick="linkUrl()" title="Link">&#128279;</button>
+          <button type="button" onclick="owFilePicker('image/*',function(f){owToast('Inserted: '+f.name)})" title="Insert image">&#128247;</button>
+        </div>
+        <div class="rt-editor" id="editor" contenteditable="true">
+          <p>Write your story here. Select text and use the toolbar to bold, colour, resize headings, add lists, quotes and links.</p>
+        </div>
+        <div class="hint mt-1">Auto-saved as you type. Markdown source view available from the editor menu.</div>
+      </div>
+
+      <!-- REGION + META -->
+      <div class="card card-pad mb-3">
+        <div class="field"><label>Region <span class="badge badge-purple" style="margin-left:6px">Required</span></label>
+          <div class="row wrap mb-2">
+            <select class="select" style="max-width:160px"><option>Telangana</option></select>
+            <select class="select" style="max-width:160px"><option>Hyderabad</option></select>
+            <select class="select" style="max-width:160px"><option>Secunderabad</option></select>
+            <select class="select" style="max-width:160px"><option>Bowenpally</option></select>
+          </div>
+          <div class="hint">Limited to your assigned regions (REQ-REG-002). Selected: Telangana &rarr; Hyderabad &rarr; Secunderabad &rarr; Bowenpally</div>
+        </div>
+        <div class="field"><label>Categories</label>
+          <div class="row wrap">
+            <button type="button" class="chip active">India</button>
+            <button type="button" class="chip">Sports</button>
+            <button type="button" class="chip">Business</button>
+            <button type="button" class="chip">Technology</button>
+          </div>
+        </div>
+        <div class="field"><label>Tags</label><input class="input" placeholder="infrastructure, budget, andhra" /></div>
+        <div class="field"><label>Hero media <span class="badge badge-purple" style="margin-left:6px">Required</span></label>
+          <div class="uploader" onclick="owFilePicker('image/*,video/*',function(f,n){owToast('Selected: '+n.join(', '))},true)">
+            <div style="font-size:26px">&#128247; &#127909;</div>
+            <div class="mt-1">Drop an image <b>or video</b> here, or click to upload</div>
+            <div class="small">Images: JPG/PNG/WebP up to 10MB &middot; Video: MP4/WebM/MOV up to 200MB</div>
+          </div>
+          <div class="hint">A video hero plays inline in the reader; a poster/thumbnail is auto-generated. Image OR video is required for submit.</div>
+        </div>
+        <div class="field"><label>Gallery (images &amp; videos)</label>
+          <div class="uploader" onclick="owFilePicker('image/*,video/*',function(f,n){owToast('Selected: '+n.join(', '))},true)" style="padding:20px">
+            <div class="mt-1">Add up to 10 media items &mdash; mix images and videos</div>
+            <div class="small">Videos up to 200MB / 3 min each</div>
+          </div>
+          <div class="row wrap mt-2">
+            <span class="badge badge-muted">&#128247; image-1.jpg</span>
+            <span class="badge badge-muted">&#127909; clip.mp4 &middot; 0:42</span>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0"><label>Media alt text / caption</label><input class="input" placeholder="Describe the media for accessibility" /></div>
+      </div>
+
+      <!-- POSTER / SHARE TEMPLATES -->
+      <div class="card card-pad mb-3">
+        <div class="row-between mb-2">
+          <div>
+            <div class="section-title" style="margin-bottom:0">Poster template</div>
+            <div class="small muted">Used when sharing this article as an image poster.</div>
+          </div>
+          <a class="btn btn-secondary btn-sm" href="r05-share-poster.html">Open full poster editor &#8594;</a>
+        </div>
+        <div class="tpl-grid" id="tplGrid">
+          <div class="tpl active" data-tpl="classic" onclick="pickTpl(this)"><div class="mini" style="background:#8a007a">HEADLINE</div><div class="cap">Classic</div></div>
+          <div class="tpl" data-tpl="breaking" onclick="pickTpl(this)"><div class="mini" style="background:#dc2626">BREAKING</div><div class="cap">Breaking</div></div>
+          <div class="tpl" data-tpl="light" onclick="pickTpl(this)"><div class="mini" style="background:#fff;color:#8a007a;border-bottom:3px solid #8a007a">HEADLINE</div><div class="cap">Minimal</div></div>
+          <div class="tpl" data-tpl="gradient" onclick="pickTpl(this)"><div class="mini" style="background:linear-gradient(135deg,#8a007a,#2563eb)">HEADLINE</div><div class="cap">Gradient</div></div>
+          <div class="tpl" data-tpl="photo" onclick="pickTpl(this)"><div class="mini" style="background:#333;background-image:linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.7))">PHOTO</div><div class="cap">Photo Hero</div></div>
+        </div>
+      </div>
+
+      <div class="row wrap">
+        <button class="btn btn-secondary" type="button" onclick="owToast('Draft saved')">Save draft</button>
+        <button class="btn btn-ghost" type="button" onclick="owPreviewModal()">Preview</button>
+        <a class="btn btn-ghost" href="r05-share-poster.html">Make poster</a>
+        <button class="btn btn-primary" type="submit">Submit for review</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+<script>
+  function fmt(cmd, val) { document.execCommand(cmd, false, val || null); document.getElementById("editor").focus(); }
+  function linkUrl() { var u = prompt("Enter URL"); if (u) fmt("createLink", u); }
+  function setColor(which, c) {
+    var el = which === "h" ? document.getElementById("pH") : document.getElementById("pD");
+    el.style.color = c;
+  }
+  function pickColor(el, which) {
+    var parent = el.parentNode;
+    parent.querySelectorAll(".swatch").forEach(function (s) { s.classList.remove("active"); });
+    el.classList.add("active");
+    setColor(which, el.getAttribute("data-c"));
+  }
+  function pickSize(el, which, px) {
+    var parent = el.parentNode;
+    parent.querySelectorAll("button").forEach(function (b) { b.classList.remove("active"); });
+    el.classList.add("active");
+    var target = which === "h" ? document.getElementById("pH") : document.getElementById("pD");
+    target.style.fontSize = px + "px";
+  }
+  function pickTpl(el) {
+    document.querySelectorAll("#tplGrid .tpl").forEach(function (t) { t.classList.remove("active"); });
+    el.classList.add("active");
+    owToast("Template: " + el.getAttribute("data-tpl"));
+  }
+</script>
+</body>
+</html>

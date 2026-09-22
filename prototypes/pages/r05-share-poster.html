@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Share Poster</title>
+<link rel="stylesheet" href="shared/app.css" />
+<style>
+  .poster-stage { background:#e9e9ee; border-radius:var(--radius-lg); padding:22px; display:flex; justify-content:center; }
+  /* 4:5 portrait poster */
+  .poster { width:100%; max-width:380px; aspect-ratio:4/5; border-radius:14px; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 8px 30px rgba(0,0,0,.18); background:#fff; }
+  .poster .brand { display:flex; align-items:center; gap:8px; font-weight:800; font-size:14px; padding:16px 18px; position:relative; z-index:2; }
+  .poster .brand .ico { width:22px; height:22px; border-radius:50% 5px 50% 50%; transform:rotate(-20deg); }
+  .poster .p-inner { flex:1; display:flex; flex-direction:column; justify-content:flex-end; padding:20px; position:relative; z-index:2; }
+  .poster .p-head { font-weight:800; line-height:1.14; margin-bottom:10px; }
+  .poster .p-desc { line-height:1.5; }
+  .poster .p-foot { display:flex; align-items:center; justify-content:space-between; padding:12px 18px; font-size:11px; font-weight:700; position:relative; z-index:2; }
+  .poster .bgimg { position:absolute; inset:0; object-fit:cover; width:100%; height:100%; z-index:0; }
+  .poster .overlay { position:absolute; inset:0; z-index:1; }
+
+  /* Template styles */
+  .t-classic { background:#8a007a; color:#fff; }
+  .t-classic .p-desc { color:#f3d9ef; }
+  .t-classic .brand .ico { background:#fff; }
+  .t-breaking { background:#dc2626; color:#fff; }
+  .t-breaking .p-desc { color:#ffe0e0; }
+  .t-breaking .brand .ico { background:#fff; }
+  .t-light { background:#fff; color:var(--text); border-top:6px solid var(--purple); }
+  .t-light .p-head { color:var(--purple); }
+  .t-gradient { background:linear-gradient(150deg,#8a007a,#2563eb); color:#fff; }
+  .t-gradient .p-desc { color:#e5def2; }
+  .t-gradient .brand .ico { background:#fff; }
+  .t-photo { background:#222; color:#fff; }
+  .t-photo .overlay { background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.85)); }
+  .t-photo .p-desc { color:#e0e0e0; }
+  .t-photo .brand .ico { background:#fff; }
+
+  .badge-tag { position:absolute; top:16px; right:16px; background:rgba(255,255,255,.9); color:var(--purple); font-size:10px; font-weight:800; padding:4px 9px; border-radius:20px; z-index:3; }
+  .share-row { display:flex; gap:10px; flex-wrap:wrap; }
+  .share-btn { border:1px solid var(--border); background:#fff; border-radius:var(--radius-md); padding:10px 14px; font-size:13px; font-weight:700; cursor:pointer; }
+  .share-btn:hover { border-color:var(--purple); color:var(--purple); }
+</style>
+</head>
+<body data-page="reporter" data-app="true">
+<div class="page-wrap">
+  <div class="page" style="max-width:960px">
+    <a href="r02-article-composer.html" class="small" style="color:var(--muted)">&larr; Back to composer</a>
+    <h1 class="page-title mt-2">Share poster</h1>
+    <p class="page-sub">Pick a template. The generated poster is attached when sharing this article.</p>
+
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:22px;align-items:start">
+      <!-- LEFT: preview -->
+      <div>
+        <div class="poster-stage">
+          <div class="poster t-classic" id="poster">
+            <span class="badge-tag" id="pTag">INDIA</span>
+            <img class="bgimg hidden" id="pBg" src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=800&q=80" alt="" />
+            <div class="overlay"></div>
+            <div class="brand"><span class="ico"></span> newswatch</div>
+            <div class="p-inner">
+              <div class="p-head" id="pH" style="font-size:30px">PM Modi Inaugurates New Infrastructure Projects in Andhra Pradesh</div>
+              <div class="p-desc" id="pD" style="font-size:15px">The Prime Minister laid the foundation stone for several projects aimed at boosting connectivity and jobs.</div>
+            </div>
+            <div class="p-foot"><span>newswatch.com</span><span id="pDate">22 Sep 2026</span></div>
+          </div>
+        </div>
+
+        <div class="row mt-2" style="justify-content:center">
+          <button class="btn btn-secondary btn-sm" onclick="owToast('Poster downloaded as PNG')">&#11015; Download PNG</button>
+          <button class="btn btn-ghost btn-sm" onclick="owToast('Copied poster to clipboard')">Copy image</button>
+        </div>
+      </div>
+
+      <!-- RIGHT: controls -->
+      <div>
+        <div class="card card-pad mb-3">
+          <div class="section-title" style="font-size:15px">Template</div>
+          <div class="row wrap" id="tplRow">
+            <button class="chip active" data-t="classic" onclick="setTpl(this,'t-classic')">Classic</button>
+            <button class="chip" data-t="breaking" onclick="setTpl(this,'t-breaking')">Breaking</button>
+            <button class="chip" data-t="light" onclick="setTpl(this,'t-light')">Minimal</button>
+            <button class="chip" data-t="gradient" onclick="setTpl(this,'t-gradient')">Gradient</button>
+            <button class="chip" data-t="photo" onclick="setTpl(this,'t-photo')">Photo Hero</button>
+          </div>
+        </div>
+
+        <div class="card card-pad mb-3">
+          <div class="section-title" style="font-size:15px">Content</div>
+          <div class="field"><label>Headline</label>
+            <textarea class="textarea" oninput="document.getElementById('pH').textContent=this.value"></textarea>
+          </div>
+          <div class="field"><label>Description</label>
+            <textarea class="textarea" oninput="document.getElementById('pD').textContent=this.value"></textarea>
+          </div>
+          <div class="field" style="margin-bottom:0"><label>Category tag</label>
+            <input class="input" value="INDIA" oninput="document.getElementById('pTag').textContent=this.value.toUpperCase()" />
+          </div>
+          <div class="field mt-2" style="margin-bottom:0">
+            <label>Photo Hero background</label>
+            <div class="row">
+              <button class="btn btn-secondary btn-sm" onclick="toggleBg()">Use background photo</button>
+              <span class="small muted">Square/jpg, 1200px+</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-pad mb-3">
+          <div class="section-title" style="font-size:15px">Headline style</div>
+          <div class="field"><label>Colour</label>
+            <div class="row wrap" id="hColors">
+              <span class="swatch" style="width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px #ccc;cursor:pointer" onclick="pc('h','#ffffff')"></span>
+              <span class="swatch" style="width:26px;height:26px;border-radius:50%;background:#171717;cursor:pointer" onclick="pc('h','#171717')"></span>
+              <span class="swatch" style="width:26px;height:26px;border-radius:50%;background:#8a007a;cursor:pointer" onclick="pc('h','#8a007a')"></span>
+              <span class="swatch" style="width:26px;height:26px;border-radius:50%;background:#ffd400;cursor:pointer" onclick="pc('h','#ffd400')"></span>
+              <input type="color" value="#ffffff" style="width:32px;height:28px;border:1px solid var(--border);border-radius:6px" oninput="pc('h',this.value)" />
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:0"><label>Font size (<span id="hSizeLbl">30</span>px)</label>
+            <input type="range" min="18" max="46" value="30" style="width:100%" oninput="psize('h',this.value)" />
+          </div>
+        </div>
+
+        <div class="card card-pad mb-3">
+          <div class="section-title" style="font-size:15px">Description style</div>
+          <div class="field"><label>Colour</label>
+            <div class="row wrap">
+              <span class="swatch" style="width:26px;height:26px;border-radius:50%;background:#ffffff;box-shadow:0 0 0 1px #ccc;cursor:pointer" onclick="pc('d','#ffffff')"></span>
+              <span class="swatch" style="width:26px;height:26px;border-radius:50%;background:#e0e0e0;cursor:pointer" onclick="pc('d','#e0e0e0')"></span>
+              <span class="swatch" style="width:26px;height:26px;border-radius:50%;background:#555555;cursor:pointer" onclick="pc('d','#555555')"></span>
+              <input type="color" value="#e0e0e0" style="width:32px;height:28px;border:1px solid var(--border);border-radius:6px" oninput="pc('d',this.value)" />
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:0"><label>Font size (<span id="dSizeLbl">15</span>px)</label>
+            <input type="range" min="11" max="24" value="15" style="width:100%" oninput="psize('d',this.value)" />
+          </div>
+        </div>
+
+        <div class="card card-pad">
+          <div class="section-title" style="font-size:15px">Share</div>
+          <div class="share-row">
+            <button class="share-btn" onclick="share('WhatsApp')">WhatsApp</button>
+            <button class="share-btn" onclick="share('X')">X</button>
+            <button class="share-btn" onclick="share('Facebook')">Facebook</button>
+            <button class="share-btn" onclick="owToast('Link + poster copied')">Copy link</button>
+            <button class="share-btn" onclick="owShareModal()">More&hellip;</button>
+          </div>
+          <p class="small muted mt-2">The poster image plus headline, description and article link are sent together.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+<script>
+  function setTpl(btn, cls) {
+    document.querySelectorAll("#tplRow .chip").forEach(function (c) { c.classList.remove("active"); });
+    btn.classList.add("active");
+    var p = document.getElementById("poster");
+    p.className = "poster " + cls;
+    // reset inline styles that templates define
+    document.getElementById("pH").style.color = "";
+    document.getElementById("pD").style.color = "";
+    if (cls === "t-photo") document.getElementById("pBg").classList.remove("hidden");
+    else document.getElementById("pBg").classList.add("hidden");
+    owToast("Template: " + btn.getAttribute("data-t"));
+  }
+  function pc(which, c) {
+    var el = which === "h" ? document.getElementById("pH") : document.getElementById("pD");
+    el.style.color = c;
+  }
+  function psize(which, v) {
+    var el = which === "h" ? document.getElementById("pH") : document.getElementById("pD");
+    el.style.fontSize = v + "px";
+    document.getElementById(which === "h" ? "hSizeLbl" : "dSizeLbl").textContent = v;
+  }
+  function toggleBg() { document.getElementById("pBg").classList.toggle("hidden"); }
+  function share(app) { owToast("Sharing to " + app + " with poster attached"); }
+</script>
+</body>
+</html>

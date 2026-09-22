@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Search Results</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-page="search">
+<div class="page-wrap">
+  <div class="page">
+    <form class="search-box" style="width:100%;height:48px;margin-bottom:20px" action="p13-search-results.html">
+      <span>&#9906;</span>
+      <input type="text" value="cricket" name="q" />
+    </form>
+
+    <div class="row mb-3">
+      <button class="chip active">All</button>
+      <button class="chip">Articles</button>
+      <button class="chip">Categories</button>
+      <button class="chip">Reporters</button>
+    </div>
+
+    <p class="muted small mb-2">12 results for "cricket"</p>
+
+    <article class="list-row">
+      <img class="thumb" src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=500&q=80" alt="" />
+      <div class="grow"><a href="p09-article-detail.html"><div class="title">India vs Australia 3rd ODI: Rohit, Kohli Make It Count</div></a><div class="sub"><mark>cricket</mark> &middot; Sports &middot; 4h ago</div></div>
+    </article>
+    <article class="list-row">
+      <img class="thumb" src="https://images.unsplash.com/photo-1521412644187-c49fa049e84d?auto=format&fit=crop&w=500&q=80" alt="" />
+      <div class="grow"><a href="p09-article-detail.html"><div class="title">Domestic Season Opens With New Format Changes</div></a><div class="sub"><mark>cricket</mark> &middot; Sports &middot; 7h ago</div></div>
+    </article>
+
+    <div class="empty">
+      <div class="big">&#128269;</div>
+      <div>No more results.</div>
+      <div class="small mt-1">Try a different keyword or browse categories.</div>
+    </div>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+</body>
+</html>

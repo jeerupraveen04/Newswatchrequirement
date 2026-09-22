@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>NewsWatch — News</title>
+<link rel="stylesheet" href="shared/app.css" />
+<style>
+  body { overflow: hidden; }
+  .scroller { position: fixed; top: var(--header-web); left: 0; right: 0; bottom: 0; overflow-y: auto; scroll-behavior: smooth; scrollbar-width: none; }
+  .scroller::-webkit-scrollbar { display: none; }
+  .news-page { min-height: calc(100vh - var(--header-web)); display: flex; justify-content: center; padding: 35px 20px 60px; }
+  .news-container { width: 100%; max-width: 900px; background: #fff; border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-card); }
+  @media (max-width: 768px) {
+    .scroller { top: var(--header-mobile); }
+    .news-page { min-height: calc(100vh - var(--header-mobile)); padding: 0; display: block; }
+    .news-container { border-radius: 0; box-shadow: none; }
+  }
+</style>
+</head>
+<body data-page="news-listing">
+<div class="news-scroller scroller" id="newsScroller">
+
+  <section class="news-page">
+    <article class="news-container">
+      <div class="hero">
+        <img src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1400&q=80" alt="News" />
+        <span class="category">India</span><span class="counter">1/12</span>
+      </div>
+      <div class="card-pad">
+        <h1 class="article-title">PM Modi Inaugurates New Infrastructure Projects in Andhra Pradesh</h1>
+        <p class="article-summary">The Prime Minister laid the foundation stone for several infrastructure projects in Andhra Pradesh, aimed at boosting connectivity, generating employment and driving regional development.</p>
+        <div class="meta-row">
+          <div class="author"><span class="avatar"></span> NewsWatch</div>
+          <div class="meta-item">&#9719; 2h ago</div>
+          <div class="meta-item">&#9673; 24.8K views</div>
+        </div>
+        <div class="action-bar">
+          <button class="action-btn" onclick="owLike(this)"><span class="ico">&#9825;</span><span class="count">1.2K</span></button>
+          <button class="action-btn" onclick="location.href='p16-comments.html'"><span class="ico">&#9711;</span><span>Comments</span></button>
+          <button class="action-btn" onclick="owShareModal()"><span class="ico">&#8999;</span><span>Share</span></button>
+          <button class="action-btn" onclick="owToggle(this)"><span class="ico">&#9873;</span><span>Save</span></button>
+        </div>
+        <div class="article-body">
+          <p>Andhra Pradesh, Oct 12: Prime Minister Narendra Modi on Saturday inaugurated and laid the foundation stone for a series of infrastructure projects in Andhra Pradesh, worth thousands of crores.</p>
+          <p>The projects include new roads, rail connectivity, industrial corridors and initiatives in the energy and port sectors.</p>
+          <p>Officials said the projects are expected to improve connectivity and support economic activity across several districts of the state.</p>
+        </div>
+        <div class="next-news" onclick="goToNews(1)">
+          <img src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=500&q=80" alt="Next news" />
+          <div><div class="next-label">NEXT NEWS</div><div class="next-title">India vs Australia 3rd ODI: Rohit, Kohli Make It Count</div></div>
+          <span class="next-arrow">&#8594;</span>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="news-page">
+    <article class="news-container">
+      <div class="hero">
+        <img src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1400&q=80" alt="Cricket" />
+        <span class="category">Sports</span><span class="counter">1/8</span>
+      </div>
+      <div class="card-pad">
+        <h1 class="article-title">India vs Australia 3rd ODI: Rohit, Kohli Make It Count</h1>
+        <p class="article-summary">India's experienced duo delivered a steady performance as the team looked to strengthen its position in the ongoing ODI series.</p>
+        <div class="meta-row">
+          <div class="author"><span class="avatar"></span> NewsWatch Sports</div>
+          <div class="meta-item">&#9719; 4h ago</div>
+          <div class="meta-item">&#9673; 18.2K views</div>
+        </div>
+        <div class="action-bar">
+          <button class="action-btn" onclick="owLike(this)"><span class="ico">&#9825;</span><span class="count">856</span></button>
+          <button class="action-btn" onclick="location.href='p16-comments.html'"><span class="ico">&#9711;</span><span>Comments</span></button>
+          <button class="action-btn" onclick="owShareModal()"><span class="ico">&#8999;</span><span>Share</span></button>
+          <button class="action-btn" onclick="owToggle(this)"><span class="ico">&#9873;</span><span>Save</span></button>
+        </div>
+        <div class="article-body">
+          <p>India produced a disciplined performance in the third ODI against Australia, with the experienced players providing stability during the middle overs.</p>
+          <p>The contest remained closely fought as both sides looked to gain an advantage in the series.</p>
+        </div>
+        <div class="next-news" onclick="goToNews(2)">
+          <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=500&q=80" alt="Next news" />
+          <div><div class="next-label">NEXT NEWS</div><div class="next-title">Sensex Rises 700 Points on Positive Global Cues</div></div>
+          <span class="next-arrow">&#8594;</span>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="news-page">
+    <article class="news-container">
+      <div class="hero">
+        <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1400&q=80" alt="Business" />
+        <span class="category">Business</span><span class="counter">1/6</span>
+      </div>
+      <div class="card-pad">
+        <h1 class="article-title">Sensex Rises 700 Points on Positive Global Cues</h1>
+        <p class="article-summary">Indian markets moved higher following positive global signals, with banking and technology stocks among the actively traded counters.</p>
+        <div class="meta-row">
+          <div class="author"><span class="avatar"></span> NewsWatch Business</div>
+          <div class="meta-item">&#9719; 5h ago</div>
+          <div class="meta-item">&#9673; 15.4K views</div>
+        </div>
+        <div class="action-bar">
+          <button class="action-btn" onclick="owLike(this)"><span class="ico">&#9825;</span><span class="count">642</span></button>
+          <button class="action-btn" onclick="location.href='p16-comments.html'"><span class="ico">&#9711;</span><span>Comments</span></button>
+          <button class="action-btn" onclick="owShareModal()"><span class="ico">&#8999;</span><span>Share</span></button>
+          <button class="action-btn" onclick="owToggle(this)"><span class="ico">&#9873;</span><span>Save</span></button>
+        </div>
+        <div class="article-body">
+          <p>The Indian stock market closed higher after global markets provided positive signals to investors.</p>
+          <p>Banking, technology and financial stocks were among the actively traded sectors during the session.</p>
+        </div>
+        <div class="next-news" onclick="goToNews(3)">
+          <img src="https://images.unsplash.com/photo-1556656793-08538906a9f8?auto=format&fit=crop&w=500&q=80" alt="Technology" />
+          <div><div class="next-label">NEXT NEWS</div><div class="next-title">iPhone 17 Pro Launch: Expected Price and Features</div></div>
+          <span class="next-arrow">&#8594;</span>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="news-page">
+    <article class="news-container">
+      <div class="hero">
+        <img src="https://images.unsplash.com/photo-1592286927505-2fd3b3eab7a6?auto=format&fit=crop&w=1400&q=80" alt="Technology" />
+        <span class="category">Technology</span><span class="counter">1/10</span>
+      </div>
+      <div class="card-pad">
+        <h1 class="article-title">iPhone 17 Pro Launch: Expected Price, Features and Release Date</h1>
+        <p class="article-summary">Apple is expected to introduce major improvements in camera performance, processing power and display technology with its next-generation Pro model.</p>
+        <div class="meta-row">
+          <div class="author"><span class="avatar"></span> NewsWatch Tech</div>
+          <div class="meta-item">&#9719; 6h ago</div>
+          <div class="meta-item">&#9673; 12.1K views</div>
+        </div>
+        <div class="action-bar">
+          <button class="action-btn" onclick="owLike(this)"><span class="ico">&#9825;</span><span class="count">1.1K</span></button>
+          <button class="action-btn" onclick="location.href='p16-comments.html'"><span class="ico">&#9711;</span><span>Comments</span></button>
+          <button class="action-btn" onclick="owShareModal()"><span class="ico">&#8999;</span><span>Share</span></button>
+          <button class="action-btn" onclick="owToggle(this)"><span class="ico">&#9873;</span><span>Save</span></button>
+        </div>
+        <div class="article-body">
+          <p>Apple's upcoming Pro smartphone is expected to bring improvements across its camera system and processor.</p>
+          <p>Industry watchers are also expecting changes to the display and battery technology.</p>
+        </div>
+        <div class="next-news" onclick="goToNews(0)">
+          <img src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=500&q=80" alt="India" />
+          <div><div class="next-label">BACK TO START</div><div class="next-title">PM Modi Inaugurates New Infrastructure Projects in Andhra Pradesh</div></div>
+          <span class="next-arrow">&#8635;</span>
+        </div>
+      </div>
+    </article>
+  </section>
+</div>
+
+<div class="scroll-indicator">
+  <span class="scroll-dot active"></span><span class="scroll-dot"></span>
+  <span class="scroll-dot"></span><span class="scroll-dot"></span>
+</div>
+
+<script src="shared/app.js"></script>
+<script>
+  var scroller = document.getElementById("newsScroller");
+  var pages = document.querySelectorAll(".news-page");
+  var dots = document.querySelectorAll(".scroll-dot");
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        var index = [].slice.call(pages).indexOf(entry.target);
+        dots.forEach(function (dot, i) { dot.classList.toggle("active", i === index); });
+      }
+    });
+  }, { root: scroller, threshold: 0.65 });
+  pages.forEach(function (p) { observer.observe(p); });
+
+  function goToNews(index) {
+    if (!pages[index]) return;
+    pages[index].scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  document.addEventListener("keydown", function (event) {
+    var current = [].slice.call(pages).findIndex(function (page) {
+      var rect = page.getBoundingClientRect();
+      return rect.top >= 0 && rect.top < window.innerHeight / 2;
+    });
+    if (event.key === "ArrowDown" || event.key === "PageDown") {
+      event.preventDefault(); goToNews(Math.min(current + 1, pages.length - 1));
+    }
+    if (event.key === "ArrowUp" || event.key === "PageUp") {
+      event.preventDefault(); goToNews(Math.max(current - 1, 0));
+    }
+  });
+</script>
+</body>
+</html>

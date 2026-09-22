@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Notifications</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-page="notifications">
+<div class="page-wrap">
+  <div class="page">
+    <div class="row-between mb-2">
+      <h1 class="page-title" style="margin-bottom:0">Notifications</h1>
+      <button class="btn btn-ghost btn-sm" onclick="owToast('All marked as read')">Mark all read</button>
+    </div>
+    <p class="page-sub">Breaking news and activity.</p>
+
+    <a class="list-row" href="p09-article-detail.html" style="border-left:3px solid var(--purple)">
+      <span style="font-size:24px">&#128227;</span>
+      <div class="grow"><div class="title">Breaking: Sensex jumps 700 points</div><div class="sub">5m ago &middot; unread</div></div>
+    </a>
+    <a class="list-row" href="p09-article-detail.html">
+      <span style="font-size:24px">&#127951;</span>
+      <div class="grow"><div class="title">New in Sports you follow</div><div class="sub">1h ago</div></div>
+    </a>
+    <a class="list-row" href="p16-comments.html">
+      <span style="font-size:24px">&#128172;</span>
+      <div class="grow"><div class="title">Meera replied to your comment</div><div class="sub">3h ago</div></div>
+    </a>
+    <a class="list-row" href="p21-about-static.html">
+      <span style="font-size:24px">&#9881;</span>
+      <div class="grow"><div class="title">App update available</div><div class="sub">1d ago</div></div>
+    </a>
+
+    <div class="empty">
+      <div class="big">&#128276;</div>
+      <div>That's everything for now.</div>
+    </div>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+</body>
+</html>

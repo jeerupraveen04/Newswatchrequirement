@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Article Moderation</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-admin="true" data-page="moderation">
+<div class="admin-main">
+  <h1 class="page-title" style="margin-bottom:2px">Article moderation</h1>
+  <p class="page-sub">Review, publish or reject submitted stories.</p>
+
+  <div class="row mb-3">
+    <button class="chip active">Pending</button>
+    <button class="chip">Published</button>
+    <button class="chip">Rejected</button>
+    <select class="select" style="max-width:190px"><option>Region: my scope</option><option>Telangana</option><option>Hyderabad</option><option>Secunderabad</option><option>Bowenpally</option></select>
+    <div class="search-box" style="margin-left:auto"><span>&#9906;</span><input placeholder="Search articles..." /></div>
+  </div>
+
+  <div class="toast-note mb-2">Moderation is <b>region-scoped</b>: admins only see and act on articles in their assigned region (REQ-REG-003). Hard delete is <b>Super Admin only</b> (<a href="a10-danger-zone.html" style="color:var(--purple);font-weight:700">Danger Zone</a>).</div>
+
+  <table class="table">
+    <tr><th style="width:36px"><input type="checkbox" /></th><th>Title</th><th>Reporter</th><th>Region</th><th>Category</th><th>Submitted</th><th>Actions</th></tr>
+    <tr>
+      <td><input type="checkbox" /></td>
+      <td>Metro Phase 3 Approved By Cabinet</td>
+      <td>Rahul Verma</td>
+      <td>Secunderabad</td>
+      <td>India</td>
+      <td>2h ago</td>
+      <td class="row">
+        <button class="btn btn-primary btn-sm" onclick="owConfirm({title:'Publish article',message:'This publishes the article to your region immediately.',confirmLabel:'Publish',onConfirm:function(){owToast('Article published')}})">Publish</button>
+        <button class="btn btn-secondary btn-sm" onclick="owRejectModal()">Reject</button>
+        <button class="btn btn-ghost btn-sm" onclick="owPreviewModal()">Preview</button>
+      </td>
+    </tr>
+    <tr>
+      <td><input type="checkbox" /></td>
+      <td>Union Budget Highlights For SMEs</td>
+      <td>Neha Das</td>
+      <td>Hyderabad</td>
+      <td>Business</td>
+      <td>4h ago</td>
+      <td class="row">
+        <button class="btn btn-primary btn-sm" onclick="owConfirm({title:'Publish article',message:'This publishes the article to your region immediately.',confirmLabel:'Publish',onConfirm:function(){owToast('Article published')}})">Publish</button>
+        <button class="btn btn-secondary btn-sm" onclick="owRejectModal()">Reject</button>
+        <button class="btn btn-ghost btn-sm" onclick="owPreviewModal()">Preview</button>
+      </td>
+    </tr>
+  </table>
+
+  <div class="row mt-3">
+    <button class="btn btn-secondary" onclick="owConfirm({title:'Approve selected',message:'Publish all selected articles?',confirmLabel:'Approve all',onConfirm:function(){owToast('Selected articles published')}})">Approve selected</button>
+    <button class="btn btn-ghost" onclick="owScheduleModal()">Schedule publish</button>
+  </div>
+
+  <div class="section-title mt-4">Rejection reason required</div>
+  <div class="card card-pad" style="max-width:520px">
+    <div class="field"><label>Reason for rejection</label><textarea class="textarea" placeholder="Explain what needs to change..."></textarea></div>
+    <div class="row"><button class="btn btn-primary btn-sm" onclick="owSubmit(event)">Send &amp; reject</button><button class="btn btn-ghost btn-sm" onclick="owToast('Cancelled')">Cancel</button></div>
+    <p class="small muted mt-2">The reporter is notified by push and email.</p>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Saved</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-page="bookmarks" data-app="true">
+<div class="page-wrap">
+  <div class="page">
+    <h1 class="page-title">Saved</h1>
+    <p class="page-sub">Articles you bookmarked for later.</p>
+
+    <div class="row mb-3">
+      <button class="chip active">All</button>
+      <button class="chip">India</button>
+      <button class="chip">Sports</button>
+    </div>
+
+    <article class="list-row">
+      <img class="thumb" src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=500&q=80" alt="" />
+      <div class="grow"><a href="p09-article-detail.html"><div class="title">PM Modi Inaugurates New Infrastructure Projects in Andhra Pradesh</div></a><div class="sub">India &middot; saved 2h ago</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="this.closest('.list-row').remove();owToast('Removed from Saved')">Remove</button>
+    </article>
+    <article class="list-row">
+      <img class="thumb" src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=500&q=80" alt="" />
+      <div class="grow"><a href="p09-article-detail.html"><div class="title">Sensex Rises 700 Points on Positive Global Cues</div></a><div class="sub">Business &middot; saved 1d ago</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="this.closest('.list-row').remove();owToast('Removed from Saved')">Remove</button>
+    </article>
+
+    <div class="empty hidden" id="empty">
+      <div class="big">&#9873;</div>
+      <div>No saved articles yet.</div>
+      <div class="small mt-1">Tap Save on any article to add it here.</div>
+      <a class="btn btn-primary mt-2" href="p07-home-feed.html">Browse news</a>
+    </div>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-name: Deploy static site to GitHub Pages
+name: Deploy prototypes to GitHub Pages
 
 on:
   push:
@@ -28,12 +28,12 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Prepare site entry point
-        run: cp newslistingscreen.html index.html
+        run: cp prototypes/pages/s02-navigation-shell.html prototypes/pages/index.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "."
+          path: "prototypes/pages"
 
       - name: Deploy to GitHub Pages
         id: deployment

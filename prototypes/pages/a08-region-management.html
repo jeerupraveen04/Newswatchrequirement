@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Region Management (Super Admin)</title>
+<link rel="stylesheet" href="shared/app.css" />
+<style>
+  .tree { background:var(--white); border:1px solid var(--border); border-radius:var(--radius-lg); padding:14px; }
+  .tree .node { padding:8px 10px; border-radius:var(--radius-md); cursor:pointer; font-size:14px; display:flex; align-items:center; gap:8px; }
+  .tree .node:hover { background:var(--purple-light); }
+  .tree .node.active { background:var(--purple); color:#fff; }
+  .tree .lvl-2 { margin-left:20px; }
+  .tree .lvl-3 { margin-left:40px; }
+  .tree .lvl-4 { margin-left:60px; }
+  .type { font-size:10px; text-transform:uppercase; letter-spacing:.05em; opacity:.7; margin-left:auto; }
+</style>
+</head>
+<body data-admin="true" data-super="true" data-page="regions">
+<div class="admin-main">
+  <div class="row-between mb-2">
+    <div>
+      <h1 class="page-title" style="margin-bottom:2px">Region management</h1>
+      <p class="page-sub" style="margin-bottom:0">State &rarr; District &rarr; Constituency &rarr; Mandal &middot; <b>Super Admin only</b></p>
+    </div>
+    <button class="btn btn-primary" onclick="owRegionModal()">+ New region</button>
+  </div>
+
+  <div class="grid grid-2" style="grid-template-columns:1fr 1.4fr;align-items:start">
+    <div class="tree">
+      <div class="section-title" style="margin-bottom:10px">Region tree</div>
+      <div class="node active">&#127482;&#127475; Telangana <span class="type">State</span></div>
+      <div class="node lvl-2" onclick="owSelect(this)">Hyderabad <span class="type">District</span></div>
+      <div class="node lvl-3" onclick="owSelect(this)">Secunderabad <span class="type">Constituency</span></div>
+      <div class="node lvl-4" onclick="owSelect(this)">Bowenpally <span class="type">Mandal</span></div>
+      <div class="node lvl-4" onclick="owSelect(this)">Tirumalgiri <span class="type">Mandal</span></div>
+      <div class="node lvl-3" onclick="owSelect(this)">Khairatabad <span class="type">Constituency</span></div>
+      <div class="node lvl-2" onclick="owSelect(this)">Rangareddy <span class="type">District</span></div>
+      <div class="node lvl-2" onclick="owSelect(this)">Warangal <span class="type">District</span></div>
+    </div>
+
+    <div>
+      <div class="card card-pad mb-3">
+        <div class="row-between mb-2">
+          <div class="section-title" style="margin-bottom:0">Bowenpally <span class="badge badge-purple">Mandal</span></div>
+          <div class="row"><button class="btn btn-ghost btn-sm" onclick="owRegionModal({name:'Bowenpally'})">Edit</button><button class="btn btn-ghost btn-sm" onclick="owConfirm({title:'Move region',message:'Choose a new parent for Bowenpally.',confirmLabel:'Move',onConfirm:function(){owToast('Region moved')}})">Move</button></div>
+        </div>
+        <div class="field"><label>Name</label><input class="input" value="Bowenpally" /></div>
+        <div class="field"><label>Parent</label><input class="input" value="Secunderabad (Constituency)" disabled /></div>
+        <div class="field"><label>Type</label>
+          <select class="select"><option>State</option><option>District</option><option>Constituency</option><option selected>Mandal</option></select>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="owSubmit(event)">Save changes</button>
+      </div>
+
+      <div class="card card-pad mb-3">
+        <div class="section-title">Admins scoped to this region</div>
+        <div class="list-row"><span class="avatar" style="background:var(--info)"></span><div class="grow"><div class="title">Sana Khan</div><div class="sub">Admin &middot; scope: Secunderabad + descendants</div></div><button class="btn btn-ghost btn-sm" onclick="owToast('Scope removed')">Remove</button></div>
+        <div class="row mt-2">
+          <input class="input" placeholder="Assign admin by email..." style="flex:1" />
+          <button class="btn btn-secondary btn-sm" onclick="owScopeModal('Sana Khan')">Assign</button>
+        </div>
+      </div>
+
+      <div class="card card-pad" style="border:1px solid rgba(220,38,38,.3)">
+        <div class="section-title" style="color:var(--error)">Delete region</div>
+        <p class="small muted mb-2">Deleting a region with children or articles is blocked until they are reassigned.</p>
+        <button class="btn btn-danger btn-sm" onclick="owConfirm({title:'Delete region',message:'This region has 2 mandals and 14 articles attached. Reassign them first.',confirmLabel:'Delete',onConfirm:function(){owToast('Blocked: region has children/articles')}})">Delete region</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+<script>
+  function owSelect(el){ document.querySelectorAll(".tree .node").forEach(function(n){n.classList.remove("active");}); el.classList.add("active"); }
+</script>
+</body>
+</html>

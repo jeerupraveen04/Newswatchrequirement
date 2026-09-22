@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Reporter Approvals</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-admin="true" data-page="approvals">
+<div class="admin-main">
+  <h1 class="page-title" style="margin-bottom:2px">Reporter approvals</h1>
+  <p class="page-sub">Review applications to publish on NewsWatch.</p>
+
+  <div class="row mb-3">
+    <button class="chip active">Pending (2)</button>
+    <button class="chip">Approved</button>
+    <button class="chip">Rejected</button>
+  </div>
+
+  <div class="card card-pad mb-3">
+    <div class="row-between">
+      <div class="row"><span class="avatar avatar-lg">R</span>
+        <div><b>Rahul Verma</b><div class="small muted">Applied 1d ago &middot; Politics, Business</div></div>
+      </div>
+      <span class="badge badge-warning">Pending</span>
+    </div>
+    <p class="small mt-2" style="line-height:1.6">Freelance journalist with 5 years covering state politics. Samples: "State Budget 2026", "Metro Phase 3".</p>
+    <div class="row mt-2">
+      <button class="btn btn-primary btn-sm" onclick="owToast('Approved &amp; reporter notified')">Approve</button>
+      <button class="btn btn-secondary btn-sm" onclick="owRejectModal()">Reject</button>
+      <button class="btn btn-ghost btn-sm" onclick="owSamplesModal()">View samples</button>
+    </div>
+  </div>
+
+  <div class="card card-pad mb-3">
+    <div class="row-between">
+      <div class="row"><span class="avatar avatar-lg" style="background:#0a7a8a">N</span>
+        <div><b>Neha Das</b><div class="small muted">Applied 2d ago &middot; Business, Technology</div></div>
+      </div>
+      <span class="badge badge-warning">Pending</span>
+    </div>
+    <p class="small mt-2" style="line-height:1.6">Business writer, previously at a regional daily. Samples attached.</p>
+    <div class="row mt-2">
+      <button class="btn btn-primary btn-sm" onclick="owToast('Approved &amp; reporter notified')">Approve</button>
+      <button class="btn btn-secondary btn-sm" onclick="owRejectModal()">Reject</button>
+    </div>
+  </div>
+
+  <div class="section-title">Assign region scope &amp; categories</div>
+  <div class="card card-pad" style="max-width:620px">
+    <div class="row wrap mb-2">
+      <select class="select" style="max-width:170px"><option>Telangana</option></select>
+      <select class="select" style="max-width:170px"><option>Hyderabad</option></select>
+      <select class="select" style="max-width:170px"><option>Secunderabad</option></select>
+    </div>
+    <div class="row wrap mb-2">
+      <button class="chip active">Bowenpally</button>
+      <button class="chip">Tirumalgiri</button>
+      <button class="chip">Khairatabad</button>
+    </div>
+    <div class="row wrap">
+      <button class="chip active">Politics</button>
+      <button class="chip">Business</button>
+      <button class="chip">Technology</button>
+      <button class="chip">Sports</button>
+    </div>
+    <p class="small muted mt-2">The reporter may only submit articles in the selected region(s) and categories (REQ-REG-002).</p>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+</body>
+</html>

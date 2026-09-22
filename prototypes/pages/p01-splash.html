@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Splash</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-chrome="none">
+<div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(160deg,var(--purple),var(--purple-dark));color:#fff;text-align:center">
+  <span class="logo-icon" style="width:64px;height:64px;background:#fff"></span>
+  <h1 style="margin-top:22px;font-size:30px;font-weight:800">newswatch</h1>
+  <p style="opacity:.85;margin-top:8px">Breaking news, one swipe away</p>
+  <div style="margin-top:40px" class="small">Loading&hellip;</div>
+  <div style="width:120px;height:4px;background:rgba(255,255,255,.25);border-radius:4px;margin-top:10px;overflow:hidden">
+    <div style="width:60%;height:100%;background:#fff"></div>
+  </div>
+  <div class="mt-4"><a class="btn" style="background:#fff;color:var(--purple)" href="p02-onboarding.html">Continue</a></div>
+</div>
+<script>
+  setTimeout(function(){ location.href = "p02-onboarding.html"; }, 2000);
+</script>
+</body>
+</html>

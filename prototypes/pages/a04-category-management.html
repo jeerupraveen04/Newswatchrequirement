@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Category Management</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-admin="true" data-page="categories">
+<div class="admin-main">
+  <div class="row-between mb-2">
+    <h1 class="page-title" style="margin-bottom:0">Category management</h1>
+    <button class="btn btn-primary" onclick="owCategoryModal()">+ New category</button>
+  </div>
+  <p class="page-sub">Create, reorder and manage topics.</p>
+
+  <table class="table">
+    <tr><th style="width:60px">Order</th><th>Name</th><th>Slug</th><th>Articles</th><th>Active</th><th>Actions</th></tr>
+    <tr><td>&#9776; 1</td><td>India</td><td>india</td><td>128</td><td><span class="badge badge-success">Active</span></td>
+      <td class="row"><button class="btn btn-ghost btn-sm" onclick="owCategoryModal({name:'India',slug:'india',description:'National news'})">Edit</button><button class="btn btn-ghost btn-sm" onclick="owConfirm({title:'Delete category',message:'Articles using this category must be reassigned first.',confirmLabel:'Delete',onConfirm:function(){owToast('Blocked: reassign articles first')}})">Delete</button></td></tr>
+    <tr><td>&#9776; 2</td><td>Sports</td><td>sports</td><td>96</td><td><span class="badge badge-success">Active</span></td>
+      <td class="row"><button class="btn btn-ghost btn-sm" onclick="owCategoryModal({name:'Sports',slug:'sports',description:'Sports coverage'})">Edit</button><button class="btn btn-ghost btn-sm" onclick="owConfirm({title:'Delete category',message:'Articles using this category must be reassigned first.',confirmLabel:'Delete',onConfirm:function(){owToast('Blocked: reassign articles first')}})">Delete</button></td></tr>
+    <tr><td>&#9776; 3</td><td>Business</td><td>business</td><td>74</td><td><span class="badge badge-success">Active</span></td>
+      <td class="row"><button class="btn btn-ghost btn-sm" onclick="owCategoryModal({name:'Business',slug:'business',description:'Markets and economy'})">Edit</button><button class="btn btn-ghost btn-sm" onclick="owConfirm({title:'Delete category',message:'Articles using this category must be reassigned first.',confirmLabel:'Delete',onConfirm:function(){owToast('Blocked: reassign articles first')}})">Delete</button></td></tr>
+    <tr><td>&#9776; 4</td><td>Technology</td><td>technology</td><td>81</td><td><span class="badge badge-success">Active</span></td>
+      <td class="row"><button class="btn btn-ghost btn-sm" onclick="owCategoryModal({name:'Technology',slug:'technology',description:'Tech and gadgets'})">Edit</button><button class="btn btn-ghost btn-sm" onclick="owConfirm({title:'Delete category',message:'Articles using this category must be reassigned first.',confirmLabel:'Delete',onConfirm:function(){owToast('Blocked: reassign articles first')}})">Delete</button></td></tr>
+  </table>
+
+  <div class="section-title mt-4">Create / edit category</div>
+  <div class="card card-pad" style="max-width:560px">
+    <div class="field"><label>Name</label><input class="input" placeholder="e.g. Health" /></div>
+    <div class="field"><label>Slug</label><input class="input" placeholder="health" /></div>
+    <div class="field"><label>Description</label><textarea class="textarea"></textarea></div>
+    <div class="field"><label>Icon / image</label><div class="uploader" onclick="owFilePicker('image/*')" style="border:2px dashed var(--border);border-radius:var(--radius-lg);padding:22px;text-align:center;color:var(--muted);cursor:pointer">Upload icon</div></div>
+    <div class="row"><button class="btn btn-primary" onclick="owSubmit(event)">Save category</button><button class="btn btn-ghost" onclick="owToast('Cancelled')">Cancel</button></div>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+</body>
+</html>

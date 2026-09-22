@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NewsWatch — Admin Dashboard</title>
+<link rel="stylesheet" href="shared/app.css" />
+</head>
+<body data-admin="true" data-page="dashboard">
+<div class="admin-main">
+  <div class="row-between mb-3">
+    <div><h1 class="page-title" style="margin-bottom:2px">Dashboard</h1><p class="page-sub" style="margin-bottom:0">Region: <b>Hyderabad district</b> &middot; scoped overview</p></div>
+    <button class="btn btn-primary" onclick="owQuickPublish()">+ Quick publish</button>
+  </div>
+
+  <div class="grid grid-4 mb-3">
+    <div class="kpi"><div class="num">1,284</div><div class="lbl">Total articles</div></div>
+    <div class="kpi"><div class="num" style="color:var(--warning)">7</div><div class="lbl">Pending review</div></div>
+    <div class="kpi"><div class="num" style="color:var(--success)">18</div><div class="lbl">Published today</div></div>
+    <div class="kpi"><div class="num">42</div><div class="lbl">Active reporters</div></div>
+  </div>
+
+  <div class="grid grid-2 mb-3">
+    <div class="card card-pad">
+      <div class="section-title">Views (7 days)</div>
+      <div style="height:160px;background:linear-gradient(180deg,var(--purple-light),#fff);border-radius:var(--radius-md);display:flex;align-items:flex-end;gap:8px;padding:12px">
+        <div style="flex:1;height:40%;background:var(--purple);border-radius:4px 4px 0 0"></div>
+        <div style="flex:1;height:65%;background:var(--purple);border-radius:4px 4px 0 0"></div>
+        <div style="flex:1;height:50%;background:var(--purple);border-radius:4px 4px 0 0"></div>
+        <div style="flex:1;height:80%;background:var(--purple);border-radius:4px 4px 0 0"></div>
+        <div style="flex:1;height:60%;background:var(--purple);border-radius:4px 4px 0 0"></div>
+        <div style="flex:1;height:90%;background:var(--purple);border-radius:4px 4px 0 0"></div>
+        <div style="flex:1;height:72%;background:var(--purple);border-radius:4px 4px 0 0"></div>
+      </div>
+    </div>
+    <div class="card card-pad">
+      <div class="section-title">Top categories</div>
+      <div class="set-row" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)"><span>India</span><b>31%</b></div>
+      <div class="set-row" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)"><span>Sports</span><b>24%</b></div>
+      <div class="set-row" style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)"><span>Business</span><b>19%</b></div>
+      <div class="set-row" style="display:flex;justify-content:space-between;padding:12px 0"><span>Technology</span><b>15%</b></div>
+    </div>
+  </div>
+
+  <div class="card card-pad">
+    <div class="row-between mb-2">
+      <div class="section-title" style="margin-bottom:0">Pending queue</div>
+      <a class="small" href="a03-article-moderation.html" style="color:var(--purple);font-weight:700">Open moderation &#8594;</a>
+    </div>
+    <table class="table">
+      <tr><th>Title</th><th>Reporter</th><th>Submitted</th><th>Status</th></tr>
+      <tr><td>Metro Phase 3 Approved By Cabinet</td><td>Rahul Verma</td><td>2h ago</td><td><span class="badge badge-warning">Pending</span></td></tr>
+      <tr><td>Union Budget Highlights For SMEs</td><td>Neha Das</td><td>4h ago</td><td><span class="badge badge-warning">Pending</span></td></tr>
+      <tr><td>Coastal Highway Opens To Traffic</td><td>Rahul Verma</td><td>1d ago</td><td><span class="badge badge-success">Published</span></td></tr>
+    </table>
+  </div>
+</div>
+<script src="shared/app.js"></script>
+</body>
+</html>
