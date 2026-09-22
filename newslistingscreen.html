@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
+
+  <title>OneWayNews - News</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --purple: #8a007a;
+      --purple-dark: #62005a;
+      --purple-light: #f7eaf6;
+      --text: #171717;
+      --muted: #737373;
+      --border: #e8e8e8;
+      --background: #f5f5f5;
+      --white: #ffffff;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+      background: var(--background);
+      color: var(--text);
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+    /* =========================================================
+       WEB HEADER
+    ========================================================= */
+
+    .web-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 68px;
+
+      background: rgba(255, 255, 255, 0.97);
+      border-bottom: 1px solid var(--border);
+
+      display: flex;
+      align-items: center;
+
+      padding: 0 40px;
+
+      z-index: 1000;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+
+      color: var(--purple);
+      font-size: 23px;
+      font-weight: 800;
+
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .logo-icon {
+      width: 34px;
+      height: 34px;
+
+      border-radius: 50% 8px 50% 50%;
+
+      background: var(--purple);
+
+      transform: rotate(-20deg);
+
+      position: relative;
+    }
+
+    .logo-icon::after {
+      content: "";
+      position: absolute;
+
+      width: 15px;
+      height: 15px;
+
+      border-left: 3px solid white;
+      border-bottom: 3px solid white;
+
+      left: 10px;
+      top: 8px;
+    }
+
+    .desktop-nav {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+
+      margin-left: 55px;
+    }
+
+    .desktop-nav a {
+      text-decoration: none;
+      color: #444;
+
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .desktop-nav a:hover {
+      color: var(--purple);
+    }
+
+    .header-actions {
+      margin-left: auto;
+
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .search-box {
+      width: 230px;
+      height: 40px;
+
+      border: 1px solid var(--border);
+      border-radius: 9px;
+
+      display: flex;
+      align-items: center;
+
+      padding: 0 13px;
+    }
+
+    .search-box input {
+      width: 100%;
+
+      border: none;
+      outline: none;
+
+      font-size: 13px;
+    }
+
+    .login-btn {
+      border: none;
+
+      background: var(--purple);
+      color: white;
+
+      padding: 10px 20px;
+
+      border-radius: 8px;
+
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* =========================================================
+       NEWS SCROLLER
+    ========================================================= */
+
+    .news-scroller {
+      position: fixed;
+
+      top: 68px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+
+      overflow-y: auto;
+
+      scroll-snap-type: y mandatory;
+
+      scroll-behavior: smooth;
+
+      scrollbar-width: none;
+    }
+
+    .news-scroller::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* =========================================================
+       NEWS PAGE
+    ========================================================= */
+
+    .news-page {
+      min-height: calc(100vh - 68px);
+
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+
+      display: flex;
+      justify-content: center;
+
+      padding: 35px 20px 60px;
+    }
+
+    .news-container {
+      width: 100%;
+      max-width: 900px;
+
+      background: var(--white);
+
+      border-radius: 16px;
+
+      overflow: hidden;
+
+      box-shadow:
+        0 3px 15px rgba(0, 0, 0, 0.05),
+        0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    /* =========================================================
+       HERO IMAGE
+    ========================================================= */
+
+    .news-image-wrapper {
+      position: relative;
+
+      width: 100%;
+      height: 470px;
+
+      overflow: hidden;
+    }
+
+    .news-image {
+      width: 100%;
+      height: 100%;
+
+      object-fit: cover;
+
+      display: block;
+    }
+
+    .category {
+      position: absolute;
+
+      left: 24px;
+      bottom: 24px;
+
+      background: var(--purple);
+
+      color: white;
+
+      padding: 7px 13px;
+
+      border-radius: 7px;
+
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .image-counter {
+      position: absolute;
+
+      right: 20px;
+      bottom: 20px;
+
+      background: rgba(0, 0, 0, 0.65);
+
+      color: white;
+
+      padding: 6px 10px;
+
+      border-radius: 7px;
+
+      font-size: 12px;
+    }
+
+    /* =========================================================
+       ARTICLE CONTENT
+    ========================================================= */
+
+    .news-content {
+      padding: 28px 35px 35px;
+    }
+
+    .news-title {
+      font-size: 34px;
+
+      line-height: 1.15;
+
+      font-weight: 800;
+
+      letter-spacing: -0.5px;
+
+      margin-bottom: 14px;
+    }
+
+    .news-summary {
+      font-size: 17px;
+
+      line-height: 1.6;
+
+      color: #555;
+
+      margin-bottom: 20px;
+    }
+
+    /* =========================================================
+       META
+    ========================================================= */
+
+    .news-meta {
+      display: flex;
+
+      align-items: center;
+
+      gap: 15px;
+
+      padding-bottom: 20px;
+
+      border-bottom: 1px solid var(--border);
+    }
+
+    .author {
+      display: flex;
+
+      align-items: center;
+
+      gap: 8px;
+
+      font-size: 13px;
+
+      font-weight: 700;
+    }
+
+    .author-logo {
+      width: 27px;
+      height: 27px;
+
+      border-radius: 50%;
+
+      background: var(--purple);
+    }
+
+    .meta-item {
+      display: flex;
+
+      align-items: center;
+
+      gap: 5px;
+
+      color: var(--muted);
+
+      font-size: 13px;
+    }
+
+    /* =========================================================
+       ACTIONS
+    ========================================================= */
+
+    .actions {
+      display: flex;
+
+      align-items: center;
+
+      gap: 8px;
+
+      padding: 18px 0;
+
+      border-bottom: 1px solid var(--border);
+    }
+
+    .action-btn {
+      border: none;
+
+      background: transparent;
+
+      cursor: pointer;
+
+      min-width: 72px;
+
+      display: flex;
+
+      flex-direction: column;
+
+      align-items: center;
+
+      gap: 5px;
+
+      color: #666;
+
+      font-size: 12px;
+    }
+
+    .action-icon {
+      width: 38px;
+      height: 38px;
+
+      border: 1px solid var(--border);
+
+      border-radius: 50%;
+
+      display: flex;
+
+      align-items: center;
+      justify-content: center;
+
+      font-size: 17px;
+    }
+
+    .action-btn:hover .action-icon {
+      background: var(--purple-light);
+
+      border-color: var(--purple);
+
+      color: var(--purple);
+    }
+
+    /* =========================================================
+       ARTICLE BODY
+    ========================================================= */
+
+    .article-body {
+      padding-top: 22px;
+    }
+
+    .article-body p {
+      font-size: 16px;
+
+      line-height: 1.8;
+
+      color: #333;
+
+      margin-bottom: 20px;
+    }
+
+    /* =========================================================
+       NEXT NEWS
+    ========================================================= */
+
+    .next-news {
+      margin-top: 30px;
+
+      padding: 14px;
+
+      background: #faf7fa;
+
+      border: 1px solid #eee0ed;
+
+      border-radius: 12px;
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 14px;
+
+      cursor: pointer;
+    }
+
+    .next-news-image {
+      width: 105px;
+      height: 75px;
+
+      object-fit: cover;
+
+      border-radius: 8px;
+
+      flex-shrink: 0;
+    }
+
+    .next-label {
+      color: var(--purple);
+
+      font-size: 11px;
+
+      font-weight: 800;
+
+      margin-bottom: 6px;
+    }
+
+    .next-title {
+      font-size: 14px;
+
+      font-weight: 700;
+
+      line-height: 1.35;
+    }
+
+    .next-arrow {
+      margin-left: auto;
+
+      color: var(--purple);
+
+      font-size: 22px;
+    }
+
+    /* =========================================================
+       WEB SIDE NAV
+    ========================================================= */
+
+    .scroll-indicator {
+      position: fixed;
+
+      right: 25px;
+      top: 50%;
+
+      transform: translateY(-50%);
+
+      z-index: 100;
+
+      display: flex;
+
+      flex-direction: column;
+
+      gap: 8px;
+    }
+
+    .scroll-dot {
+      width: 7px;
+      height: 7px;
+
+      border-radius: 50%;
+
+      background: #ccc;
+    }
+
+    .scroll-dot.active {
+      height: 24px;
+
+      background: var(--purple);
+
+      border-radius: 5px;
+    }
+
+    /* =========================================================
+       MOBILE
+    ========================================================= */
+
+    @media (max-width: 768px) {
+      body {
+        background: white;
+      }
+
+      .web-header {
+        height: 62px;
+
+        padding: 0 16px;
+
+        background: var(--purple);
+
+        border: none;
+      }
+
+      .logo {
+        color: white;
+
+        font-size: 19px;
+      }
+
+      .logo-icon {
+        width: 29px;
+        height: 29px;
+
+        background: white;
+      }
+
+      .logo-icon::after {
+        border-color: var(--purple);
+      }
+
+      .desktop-nav,
+      .search-box,
+      .login-btn {
+        display: none;
+      }
+
+      .header-actions {
+        gap: 18px;
+      }
+
+      .mobile-icon {
+        color: white;
+
+        font-size: 21px;
+      }
+
+      .news-scroller {
+        top: 62px;
+        bottom: 0;
+
+        scroll-snap-type: y mandatory;
+      }
+
+      .news-page {
+        min-height: calc(100vh - 62px);
+
+        padding: 0;
+
+        background: white;
+
+        display: block;
+      }
+
+      .news-container {
+        width: 100%;
+
+        min-height: calc(100vh - 62px);
+
+        border-radius: 0;
+
+        box-shadow: none;
+
+        display: flex;
+
+        flex-direction: column;
+      }
+
+      .news-image-wrapper {
+        height: 300px;
+
+        flex-shrink: 0;
+      }
+
+      .category {
+        left: 15px;
+        bottom: 15px;
+
+        padding: 6px 11px;
+      }
+
+      .image-counter {
+        right: 15px;
+        bottom: 15px;
+      }
+
+      .news-content {
+        padding: 20px 17px 30px;
+      }
+
+      .news-title {
+        font-size: 24px;
+
+        line-height: 1.22;
+
+        margin-bottom: 10px;
+      }
+
+      .news-summary {
+        font-size: 14px;
+
+        line-height: 1.5;
+
+        margin-bottom: 15px;
+      }
+
+      .news-meta {
+        gap: 10px;
+
+        flex-wrap: wrap;
+
+        padding-bottom: 15px;
+      }
+
+      .author {
+        font-size: 12px;
+      }
+
+      .meta-item {
+        font-size: 11px;
+      }
+
+      .actions {
+        justify-content: space-between;
+
+        padding: 13px 0;
+      }
+
+      .action-btn {
+        min-width: 55px;
+      }
+
+      .action-icon {
+        width: 34px;
+        height: 34px;
+
+        font-size: 15px;
+      }
+
+      .article-body {
+        padding-top: 16px;
+      }
+
+      .article-body p {
+        font-size: 15px;
+
+        line-height: 1.65;
+
+        margin-bottom: 16px;
+      }
+
+      .next-news {
+        margin-top: 20px;
+
+        padding: 10px;
+      }
+
+      .next-news-image {
+        width: 88px;
+        height: 64px;
+      }
+
+      .next-title {
+        font-size: 13px;
+      }
+
+      .scroll-indicator {
+        right: 8px;
+      }
+
+      .scroll-dot {
+        width: 5px;
+        height: 5px;
+      }
+
+      .scroll-dot.active {
+        height: 18px;
+      }
+    }
+
+    /* =========================================================
+       SMALL PHONES
+    ========================================================= */
+
+    @media (max-width: 390px) {
+      .news-image-wrapper {
+        height: 270px;
+      }
+
+      .news-title {
+        font-size: 22px;
+      }
+
+      .news-content {
+        padding: 17px 14px 25px;
+      }
+
+      .article-body p {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =======================================================
+       WEB HEADER
+  ======================================================== -->
+
+  <header class="web-header">
+
+    <a href="#" class="logo">
+      <span class="logo-icon"></span>
+      <span>oneway news</span>
+    </a>
+
+    <nav class="desktop-nav">
+      <a href="#">Home</a>
+      <a href="#">Categories</a>
+      <a href="#">Live TV</a>
+      <a href="#">About</a>
+    </nav>
+
+    <div class="header-actions">
+
+      <div class="search-box">
+        <input
+          type="text"
+          placeholder="Search news..."
+        />
+
+        <span>⌕</span>
+      </div>
+
+      <button class="login-btn">
+        Login
+      </button>
+
+      <span class="mobile-icon">⌕</span>
+      <span class="mobile-icon">⋮</span>
+
+    </div>
+
+  </header>
+
+
+  <!-- =======================================================
+       NEWS SCROLLER
+  ======================================================== -->
+
+  <main
+    class="news-scroller"
+    id="newsScroller"
+  >
+
+    <!-- NEWS 1 -->
+
+    <section class="news-page">
+
+      <article class="news-container">
+
+        <div class="news-image-wrapper">
+
+          <img
+            class="news-image"
+            src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1400&q=80"
+            alt="News"
+          />
+
+          <span class="category">
+            India
+          </span>
+
+          <span class="image-counter">
+            1/12
+          </span>
+
+        </div>
+
+
+        <div class="news-content">
+
+          <h1 class="news-title">
+            PM Modi Inaugurates New Infrastructure Projects in Andhra Pradesh
+          </h1>
+
+          <p class="news-summary">
+            The Prime Minister laid the foundation stone for several
+            infrastructure projects in Andhra Pradesh, aimed at boosting
+            connectivity, generating employment and driving regional
+            development.
+          </p>
+
+
+          <div class="news-meta">
+
+            <div class="author">
+              <span class="author-logo"></span>
+              OneWay News
+            </div>
+
+            <div class="meta-item">
+              ◷ 2h ago
+            </div>
+
+            <div class="meta-item">
+              ◉ 24.8K views
+            </div>
+
+          </div>
+
+
+          <div class="actions">
+
+            <button class="action-btn">
+              <span class="action-icon">♡</span>
+              <span>1.2K</span>
+            </button>
+
+            <button class="action-btn">
+              <span class="action-icon">◯</span>
+              <span>Comments</span>
+            </button>
+
+            <button class="action-btn">
+              <span class="action-icon">⌯</span>
+              <span>Share</span>
+            </button>
+
+            <button class="action-btn">
+              <span class="action-icon">♡</span>
+              <span>Save</span>
+            </button>
+
+          </div>
+
+
+          <div class="article-body">
+
+            <p>
+              Andhra Pradesh, Oct 12: Prime Minister Narendra Modi
+              on Saturday inaugurated and laid the foundation stone
+              for a series of infrastructure projects in Andhra Pradesh,
+              worth thousands of crores.
+            </p>
+
+            <p>
+              The projects include new roads, rail connectivity,
+              industrial corridors and initiatives in the energy and
+              port sectors.
+            </p>
+
+            <p>
+              Officials said the projects are expected to improve
+              connectivity and support economic activity across
+              several districts of the state.
+            </p>
+
+          </div>
+
+
+          <!-- NEXT NEWS -->
+
+          <div
+            class="next-news"
+            onclick="goToNews(1)"
+          >
+
+            <img
+              class="next-news-image"
+              src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=500&q=80"
+              alt="Next news"
+            />
+
+            <div>
+
+              <div class="next-label">
+                NEXT NEWS
+              </div>
+
+              <div class="next-title">
+                India vs Australia 3rd ODI:
+                Rohit, Kohli Make It Count
+              </div>
+
+            </div>
+
+            <span class="next-arrow">
+              →
+            </span>
+
+          </div>
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- NEWS 2 -->
+
+    <section class="news-page">
+
+      <article class="news-container">
+
+        <div class="news-image-wrapper">
+
+          <img
+            class="news-image"
+            src="https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1400&q=80"
+            alt="Cricket news"
+          />
+
+          <span class="category">
+            Sports
+          </span>
+
+          <span class="image-counter">
+            1/8
+          </span>
+
+        </div>
+
+
+        <div class="news-content">
+
+          <h1 class="news-title">
+            India vs Australia 3rd ODI: Rohit, Kohli Make It Count
+          </h1>
+
+          <p class="news-summary">
+            India's experienced duo delivered a steady performance
+            as the team looked to strengthen its position in the
+            ongoing ODI series.
+          </p>
+
+
+          <div class="news-meta">
+
+            <div class="author">
+              <span class="author-logo"></span>
+              OneWay Sports
+            </div>
+
+            <div class="meta-item">
+              ◷ 4h ago
+            </div>
+
+            <div class="meta-item">
+              ◉ 18.2K views
+            </div>
+
+          </div>
+
+
+          <div class="actions">
+
+            <button class="action-btn">
+              <span class="action-icon">♡</span>
+              <span>856</span>
+            </button>
+
+            <button class="action-btn">
+              <span class="action-icon">◯</span>
+              <span>Comments</span>
+            </button>
+
+            <button class="action-btn">
+              <span class="action-icon">⌯</span>
+              <span>Share</span>
+            </button>
+
+            <button class="action-btn">
+              <span class="action-icon">♡</span>
+              <span>Save</span>
+            </button>
+
+          </div>
+
+
+          <div class="article-body">
+
+            <p>
+              India produced a disciplined performance in the third
+              ODI against Australia, with the experienced players
+              providing stability during the middle overs.
+            </p>
+
+            <p>
+              The contest remained closely fought as both sides
+              looked to gain an advantage in the series.
+            </p>
+
+            <p>
+              Fans packed the stadium as the teams continued their
+              battle for the series lead.
+            </p>
+
+          </div>
+
+
+          <div
+            class="next-news"
+            onclick="goToNews(2)"
+          >
+
+            <img
+              class="next-news-image"
+              src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=500&q=80"
+              alt="Next news"
+            />
+
+            <div>
+
+              <div class="next-label">
+                NEXT NEWS
+              </div>
+
+              <div class="next-title">
+                Sensex Rises 700 Points on
+                Positive Global Cues
+              </div>
+
+            </div>
+
+            <span class="next-arrow">
+              →
+            </span>
+
+          </div>
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- NEWS 3 -->
+
+    <section class="news-page">
+
+      <article class="news-container">
+
+        <div class="news-image-wrapper">
+
+          <img
+            class="news-image"
+            src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1400&q=80"
+            alt="Business news"
+          />
+
+          <span class="category">
+            Business
+          </span>
+
+          <span class="image-counter">
+            1/6
+          </span>
+
+        </div>
+
+
+        <div class="news-content">
+
+          <h1 class="news-title">
+            Sensex Rises 700 Points on Positive Global Cues
+          </h1>
+
+          <p class="news-summary">
+            Indian markets moved higher following positive global
+            signals, with banking and technology stocks among the
+            actively traded counters.
+          </p>
+
+
+          <div class="news-meta">
+
+            <div class="author">
+              <span class="author-logo"></span>
+              OneWay Business
+            </div>
+
+            <div class="meta-item">
+              ◷ 5h ago
+            </div>
+
+            <div class="meta-item">
+              ◉ 15.4K views
+            </div>
+
+          </div>
+
+
+          <div class="actions">
+
+            <button class="action-btn">
+              <span class="action-icon">♡</span>
+              <span>642</span>
+            </button>
+
+            <button class="action-btn">
+              <span class="action-icon">◯</span>
+              <span>Comments</span>
+            </button>
+
+            <button class="action-btn">
+              <span class="action-icon">⌯</span>
+              <span>Share</span>
+            </button>
+
+            <button class="action-btn">
+              <span class="action-icon">♡</span>
+              <span>Save</span>
+            </button>
+
+          </div>
+
+
+          <div class="article-body">
+
+            <p>
+              The Indian stock market closed higher after global
+              markets provided positive signals to investors.
+            </p>
+
+            <p>
+              Banking, technology and financial stocks were among
+              the actively traded sectors during the session.
+            </p>
+
+            <p>
+              Analysts continued to monitor global developments,
+              currency movements and upcoming corporate results.
+            </p>
+
+          </div>
+
+
+          <div
+            class="next-news"
+            onclick="goToNews(3)"
+          >
+
+            <img
+              class="next-news-image"
+              src="https://images.unsplash.com/photo-1556656793-08538906a9f8?auto=format&fit=crop&w=500&q=80"
+              alt="Technology news"
+            />
+
+            <div>
+
+              <div class="next-label">
+                NEXT NEWS
+              </div>
+
+              <div class="next-title">
+                iPhone 17 Pro Launch:
+                Expected Price and Features
+              </div>
+
+            </div>
+
+            <span class="next-arrow">
+              →
+            </span>
+
+          </div>
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- NEWS 4 -->
+
+    <section class="news-page">
+
+      <article class="news-container">
+
+        <div class="news-image-wrapper">
+
+          <img
+            class="news-image"
+            src="https://images.unsplash.com/photo-1592286927505-2fd3b3eab7a6?auto=format&fit=crop&w=1400&q=80"
+            alt="Technology news"
+          />
+
+          <span class="category">
+            Technology
+          </span>
+
+          <span class="image-counter">
+            1/10
+          </span>
+
+        </div>
+
+
+        <div class="news-content">
+
+          <h1 class="news-title">
+            iPhone 17 Pro Launch: Expected Price, Features and Release Date
+          </h1>
+
+          <p class="news-summary">
+            Apple is expected to introduce major improvements in
+            camera performance, processing power and display
+            technology with its next-generation Pro model.
+          </p>
+
+
+          <div class="news-meta">
+
+            <div class="author">
+              <span class="author-logo"></span>
+              OneWay Tech
+            </div>
+
+            <div class="meta-item">
+              ◷ 6h ago
+            </div>
+
+            <div class="meta-item">
+              ◉ 12.1K views
+            </div>
+
+          </div>
+
+
+          <div class="actions">
+
+            <button class="action-btn">
+              <span class="action-icon">♡</span>
+              <span>1.1K</span>
+            </button>
+
+            <button class="action-btn">
+              <span class="action-icon">◯</span>
+              <span>Comments</span>
+            </button>
+
+            <button class="action-btn">
+              <span class="action-icon">⌯</span>
+              <span>Share</span>
+            </button>
+
+            <button class="action-btn">
+              <span class="action-icon">♡</span>
+              <span>Save</span>
+            </button>
+
+          </div>
+
+
+          <div class="article-body">
+
+            <p>
+              Apple's upcoming Pro smartphone is expected to bring
+              improvements across its camera system and processor.
+            </p>
+
+            <p>
+              Industry watchers are also expecting changes to the
+              display and battery technology.
+            </p>
+
+          </div>
+
+        </div>
+
+      </article>
+
+    </section>
+
+  </main>
+
+
+  <!-- =======================================================
+       DESKTOP SCROLL INDICATOR
+  ======================================================== -->
+
+  <div class="scroll-indicator">
+
+    <span class="scroll-dot active"></span>
+    <span class="scroll-dot"></span>
+    <span class="scroll-dot"></span>
+    <span class="scroll-dot"></span>
+
+  </div>
+
+
+  <script>
+
+    const scroller =
+      document.getElementById("newsScroller");
+
+    const pages =
+      document.querySelectorAll(".news-page");
+
+    const dots =
+      document.querySelectorAll(".scroll-dot");
+
+
+    /*
+     * Update the right-side progress indicator.
+     */
+
+    const observer =
+      new IntersectionObserver(
+        (entries) => {
+
+          entries.forEach((entry) => {
+
+            if (entry.isIntersecting) {
+
+              const index =
+                [...pages].indexOf(entry.target);
+
+              dots.forEach((dot, i) => {
+
+                dot.classList.toggle(
+                  "active",
+                  i === index
+                );
+
+              });
+
+            }
+
+          });
+
+        },
+        {
+          root: scroller,
+          threshold: 0.65
+        }
+      );
+
+
+    pages.forEach((page) => {
+
+      observer.observe(page);
+
+    });
+
+
+    /*
+     * Move to a specific news article.
+     */
+
+    function goToNews(index) {
+
+      if (!pages[index]) {
+        return;
+      }
+
+      pages[index].scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+
+    }
+
+
+    /*
+     * Keyboard navigation for desktop.
+     *
+     * ArrowDown / PageDown = next news
+     * ArrowUp / PageUp = previous news
+     */
+
+    document.addEventListener(
+      "keydown",
+      (event) => {
+
+        const current =
+          [...pages].findIndex((page) => {
+
+            const rect =
+              page.getBoundingClientRect();
+
+            return (
+              rect.top >= 0 &&
+              rect.top < window.innerHeight / 2
+            );
+
+          });
+
+
+        if (
+          event.key === "ArrowDown" ||
+          event.key === "PageDown"
+        ) {
+
+          event.preventDefault();
+
+          goToNews(
+            Math.min(
+              current + 1,
+              pages.length - 1
+            )
+          );
+
+        }
+
+
+        if (
+          event.key === "ArrowUp" ||
+          event.key === "PageUp"
+        ) {
+
+          event.preventDefault();
+
+          goToNews(
+            Math.max(
+              current - 1,
+              0
+            )
+          );
+
+        }
+
+      }
+    );
+
+  </script>
+
+</body>
+</html>
