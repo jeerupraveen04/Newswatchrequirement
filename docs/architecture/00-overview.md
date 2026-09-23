@@ -264,8 +264,10 @@ Requirement IDs in the `SYS` area are used for cross-cutting platform concerns.
 | Backend | Node.js (LTS) + Express + TypeScript | Spec-mandated |
 | Validation | Zod (shared schemas) | One schema for API + clients |
 | DB | PostgreSQL 15+ | Relational integrity, `tsvector` FTS |
-| ORM/migrations | Prisma (or Knex) | Typed client + versioned migrations |
-| Cache/queue | Redis (cache + BullMQ queue + Socket.IO adapter) | Single dependency, multiple uses |
+| ORM/schema | Drizzle ORM (schema + types only) | Typed queries; **no DDL generation** |
+| Migrations | dbmate (plain SQL, forward-only) | Versioned migrations owned by the team |
+| Queue/jobs | pgmq (PostgreSQL message queue extension) | No extra broker; transactional enqueue |
+| Cache | Redis | Cache + Socket.IO adapter |
 | Realtime | Socket.IO | Live comments (realtime) |
 | Storage | Cloudflare R2 (S3 API compatibility; MinIO in dev) | Presigned PUT/GET uploads, public bucket behind Cloudflare CDN, zero egress fees |
 | Auth | JWT (access+refresh), OTP, OAuth Google/Apple | Spec-mandated |
@@ -296,7 +298,7 @@ newswatch/
 │   └── config/          # eslint/tsconfig presets
 ├── infra/
 │   ├── docker-compose.yml   # local PG + Redis + MinIO
-│   ├── migrations/          # SQL/Prisma migrations
+│   ├── migrations/          # dbmate SQL migrations + pgmq setup
 │   └── deploy/              # IaC / container manifests
 ├── docs/                    # THIS documentation repo (spec)
 └── turbo.json / pnpm-workspace.yaml

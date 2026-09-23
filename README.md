@@ -41,10 +41,14 @@ product decision is left ambiguous.
 | Web app | React (Next.js) |
 | Backend | Node.js + Express |
 | Database | PostgreSQL |
+| Schema / types | Drizzle ORM (schema + types only) |
+| Migrations | dbmate (plain SQL, forward-only) |
+| Queue / jobs | pgmq (PostgreSQL message queue extension) |
 | Media storage (images + video) | **Cloudflare R2** (Cloudflare CDN) |
 | Auth | JWT access + refresh tokens, OTP login, OAuth (Google/Apple) |
 | Push notifications | Firebase Cloud Messaging (FCM) |
 | Realtime | WebSocket / Socket.IO (live comments) |
+| Cache | Redis |
 | Analytics | Firebase Analytics + backend events |
 
 See [`docs/architecture/00-overview.md`](docs/architecture/00-overview.md) for the

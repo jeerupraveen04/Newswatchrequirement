@@ -1,0 +1,6 @@
+{
+  "name": "@newswatch/config",
+  "version": "0.1.0",
+  "private": true,
+  "files": ["tsconfig.base.json", "tsconfig.node.json", "eslint-preset.cjs", "prettier-preset.cjs"]
+}

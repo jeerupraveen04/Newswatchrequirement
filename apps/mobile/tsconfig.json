@@ -1,0 +1,13 @@
+{
+  "extends": "@newswatch/config/tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM"],
+    "moduleResolution": "bundler",
+    "allowJs": true,
+    "noEmit": true,
+    "types": ["react", "react-native", "expo"]
+  },
+  "include": ["src", "App.tsx", "app.config.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}

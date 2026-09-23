@@ -1417,55 +1417,41 @@ Rules:
 
 ## 9. Migrations
 
-Recommended ORM/migration tool: **Prisma** (default) or **Knex**.
+Schema + typed queries: **Drizzle ORM**. Migrations: **dbmate** (plain SQL,
+forward-only). Drizzle defines the schema and resulting TypeScript types only;
+it never generates or applies DDL — all DDL lives in dbmate migration files
 
 | Concern | Rule |
 |---|---|
-| Versioning | Sequential, forward-only migration files committed to the repo |
-| Naming | `<timestamp>_<description>` (e.g. `20260922_add_breaking_flag`) |
-| Execution | Pre-deploy job, never at app boot (REQ-SYS-444) |
+| Schema/types | Drizzle ORM (`apps/api/src/db/schema.ts`) — types only |
+| Migrations | dbmate SQL files in `apps/api/db/migrations/` |
+| Naming | `<number>_<description>.sql` (e.g. `0002_extras.sql`) |
+| Execution | Pre-deploy job (`dbmate up`), never at app boot (REQ-SYS-444) |
 | Expand/contract | Add nullable/backfilled columns first; drop old columns in a later release |
-| Seed data | Roles, permissions, base categories, sample channels |
-| Rollback | Emergency down-migrations only; forward-fix preferred |
+| Seed data | Roles, permissions, base categories, region tree, demo users |
+| Rollback | Each migration declares `-- migrate:down`; forward-fix preferred |
 
-### 9.1 Prisma sketch
+### 9.1 Drizzle schema (types only)
 
-```prisma
-model User {
-  id            String    @id @default(uuid())
-  email         String?   @unique
-  phone         String?   @unique
-  username      String    @unique
-  displayName   String    @map("display_name")
-  passwordHash  String?   @map("password_hash")
-  role          UserRole  @default(user)
-  status        UserStatus @default(active)
-  isDeleted     Boolean   @default(false) @map("is_deleted")
-  deletedAt     DateTime? @map("deleted_at")
-  deletedBy     String?   @map("deleted_by")
-  restoredAt    DateTime? @map("restored_at")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
-  articles      Article[]
-  comments      Comment[]
-  @@index([role])
-  @@map("users")
-}
+```ts
+// apps/api/src/db/schema.ts (excerpt)
+export const userRole = pgEnum("UserRole", ["user","reporter","admin","super_admin"]);
 
-model Region {
-  id        String     @id @default(uuid())
-  type      RegionType
-  name      String
-  slug      String     @unique
-  parentId  String?    @map("parent_id")
-  parent    Region?    @relation("RegionTree", fields: [parentId], references: [id])
-  children  Region[]   @relation("RegionTree")
-  articles  Article[]
-  @@index([parentId])
-  @@index([type])
-  @@map("regions")
-}
+export const regions = pgTable("regions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  type: regionType("type").notNull(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  parentId: uuid("parent_id"),
+  sortOrder: integer("sort_order").default(0).notNull(),
+});
+
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
 ```
+
+`search_vector` is a DB-generated `tsvector` column and is intentionally omitted
+from the Drizzle table so it is never written; search uses raw SQL.
 
 ### 9.2 Seed essentials
 

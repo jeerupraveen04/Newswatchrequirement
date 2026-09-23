@@ -40,7 +40,7 @@ flowchart TB
     Controller --> Service[Services\nbusiness rules + orchestration]
     Service --> Repo[Repositories\ndata access only]
     Service --> Cache[Cache layer\nRedis]
-    Service --> Queue[Queue producer\nBullMQ]
+    Service --> Queue[Queue producer\npgmq]
     Service --> SocketP[Socket.IO publisher]
     Service --> Ext[External clients\nSMS? Email? FCM? R2?]
     Repo --> PG[(PostgreSQL)]
@@ -75,7 +75,7 @@ apps/api/
 │   ├── app.ts                    # express app assembly (no listen)
 │   ├── config/
 │   │   ├── env.ts                # env schema + validation (fail fast)
-│   │   ├── db.ts                 # pg pool / Prisma client
+│   │   ├── db/client.ts          # postgres.js + Drizzle
 │   │   ├── redis.ts
 │   │   ├── logger.ts
 │   │   └── constants.ts
@@ -141,7 +141,7 @@ apps/api/
 │   │   └── errorHandler.ts
 │   ├── validators/               # Zod schemas per route
 │   ├── jobs/
-│   │   ├── queues.ts
+│   │   ├── queue.ts              # pgmq send/read/archive
 │   │   ├── workers/
 │   │   │   ├── imageProcessor.worker.ts
 │   │   │   ├── mediaProbe.worker.ts      # ffprobe: duration + dimensions
@@ -165,7 +165,7 @@ apps/api/
 │   │   └── codes.ts              # error code catalog
 │   ├── utils/                    # pagination, slug, crypto, dates, retry
 │   └── types/
-├── prisma/ (or migrations/)
+├── db/                           # dbmate migrations + seed
 ├── tests/
 ├── Dockerfile
 └── package.json
@@ -420,7 +420,7 @@ poster. (REQ-POSTER-001..014)
 
 `media.service` owns the **mixed image/video** upload lifecycle and is the only
 place that signs uploads, validates media constraints, and enqueues processing.
-Video transcoding runs in dedicated FFmpeg/BullMQ workers (**`transcode.worker`**
+Video transcoding runs in dedicated FFmpeg workers consuming **pgmq** (**`transcode.worker`**
 plus probe/poster workers), never on the request path (REQ-SYS-343).
 
 - **Kinds & limits.** `media_assets.kind` (type `media_kind`) is `image` or
@@ -497,7 +497,7 @@ export class AppError extends Error {
 `errorHandler` maps:
 - `AppError` → its status + envelope with `error.code`.
 - Zod (uncaught) → 422 `VALIDATION_ERROR`.
-- Prisma unique violation → 409 `CONFLICT`.
+- Unique violation (Postgres `23505`) → 409 `CONFLICT`.
 - Unknown → 500 `INTERNAL_ERROR`; log stack; never leak to client.
 
 ```mermaid
@@ -522,12 +522,12 @@ flowchart LR
 
 ## 8. Background jobs
 
-Queue: **BullMQ on Redis**. Producers enqueue from services after DB commit;
-consumers are separate processes.
+Queue: **pgmq** (PostgreSQL message queue extension). Producers enqueue from
+services after DB commit; consumers are separate processes polling queues.
 
 ```mermaid
 flowchart LR
-  Svc[Service] -->|enqueue| Q[(Redis / BullMQ)]
+  Svc[Service] -->|enqueue| Q[(PostgreSQL / pgmq)]
   Q --> W1[imageProcessor]
   Q --> W2[notification]
   Q --> W3[scheduledPublish]

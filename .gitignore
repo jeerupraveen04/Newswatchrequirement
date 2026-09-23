@@ -1,0 +1,35 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# builds
+dist/
+build/
+.next/
+out/
+.turbo/
+
+# env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# os/editor
+.DS_Store
+.idea/
+.vscode/
+
+# uploads/tmp
+tmp/
+coverage/
+
+# expo
+apps/mobile/.expo/
+apps/mobile/ios/
+apps/mobile/android/
