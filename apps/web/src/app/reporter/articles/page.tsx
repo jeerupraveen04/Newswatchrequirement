@@ -71,6 +71,9 @@ export default function MyArticlesPage() {
             ) : (
               <Link href={`/news/${a.slug}`} className="btn btn-ghost btn-sm">View</Link>
             )}
+            {a.status === "published" && (
+              <Link href={`/poster?id=${a.id}`} className="btn btn-ghost btn-sm">Poster</Link>
+            )}
           </div>
         </div>
       ))}

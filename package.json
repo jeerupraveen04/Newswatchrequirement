@@ -13,8 +13,9 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
-    "db:migrate": "pnpm --filter @newswatch/api db:migrate",
-    "db:seed": "pnpm --filter @newswatch/api db:seed"
+    "db:up": "pnpm --filter @newswatch/api db:up",
+    "db:seed": "pnpm --filter @newswatch/api db:seed",
+    "worker": "pnpm --filter @newswatch/api worker"
   },
   "devDependencies": {
     "prettier": "^3.3.3",

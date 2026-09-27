@@ -5,6 +5,8 @@ import { apiFetch } from "@/lib/api";
 import type { ArticleDetail } from "@/lib/types";
 import { formatCount, formatRelative } from "@/lib/types";
 import { ArticleActions } from "@/components/article-actions";
+import { Comments } from "@/components/comments";
+import { getSession } from "@/lib/session";
 
 export const revalidate = 60;
 
@@ -31,7 +33,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function ArticlePage({ params }: { params: { slug: string } }) {
-  const article = await getArticle(params.slug);
+  const [article, session] = await Promise.all([getArticle(params.slug), getSession()]);
   if (!article) notFound();
 
   const hero = article.heroMedia;
@@ -53,7 +55,13 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           )}
         </div>
         <div className="card-pad">
-          <h1 className="article-title" style={{ color: article.headlineStyle?.color ?? undefined, fontSize: article.headlineStyle?.fontSize ? `${article.headlineStyle.fontSize}px` : undefined }}>
+          <h1
+            className="article-title"
+            style={{
+              color: article.headlineStyle?.color ?? undefined,
+              fontSize: article.headlineStyle?.fontSize ? `${article.headlineStyle.fontSize}px` : undefined,
+            }}
+          >
             {article.title}
           </h1>
           <p className="article-summary" style={{ color: article.descriptionStyle?.color ?? undefined }}>
@@ -79,6 +87,9 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           )}
         </div>
       </article>
+
+      <Comments articleId={article.id} canPost={Boolean(session.user)} />
+
       <div className="row mt-3">
         <Link href="/listing" className="btn btn-secondary">Open scroller mode</Link>
       </div>

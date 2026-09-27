@@ -22,7 +22,12 @@ export default function ForgotPasswordPage() {
       <h1>Forgot password?</h1>
       <p className="lead">Enter your email and we&rsquo;ll send a reset code.</p>
       {sent ? (
-        <div className="toast-note">If an account exists for <b>{email}</b>, a reset code has been sent. It expires in 30 minutes.</div>
+        <div className="toast-note">
+          If an account exists for <b>{email}</b>, a reset code has been sent.
+          <div className="mt-2">
+            <a href={`/reset-password?email=${encodeURIComponent(email)}`} className="btn btn-primary btn-sm">Enter reset code</a>
+          </div>
+        </div>
       ) : (
         <form onSubmit={submit}>
           <div className="field"><label>Email address</label><input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required /></div>

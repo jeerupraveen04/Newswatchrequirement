@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: ghcr.io/pgmq/pg16-pgmq:latest
+        env:
+          POSTGRES_USER: newswatch
+          POSTGRES_PASSWORD: newswatch
+          POSTGRES_DB: newswatch
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U newswatch"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://newswatch:newswatch@localhost:5432/newswatch?sslmode=disable
+      REDIS_URL: redis://localhost:6379
+      JWT_ACCESS_SECRET: ci-access-secret
+      JWT_REFRESH_SECRET: ci-refresh-secret
+      NODE_ENV: test
+      PORT: 4010
+      NEXT_PUBLIC_API_URL: http://localhost:4010/api/v1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install dbmate
+        run: |
+          curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
+          chmod +x /usr/local/bin/dbmate
+          dbmate --version
+
+      - name: Apply migrations
+        working-directory: apps/api
+        run: dbmate --migrations-dir db/migrations up
+
+      - name: Seed database
+        run: pnpm --filter @newswatch/api db:seed
+
+      - name: Typecheck
+        run: pnpm -r typecheck
+
+      - name: API tests
+        run: pnpm --filter @newswatch/api test
+
+      - name: Build API
+        run: pnpm --filter @newswatch/api build
+
+      - name: Build web
+        run: pnpm --filter @newswatch/web build

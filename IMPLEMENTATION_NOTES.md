@@ -10,9 +10,9 @@ Phases mirror the `IMPLEMENTATION_PROMPT.md` build order.
 | **P0** Foundation | ✅ Done | Monorepo, **Drizzle schema (types only)**, **dbmate migrations**, seed, docker-compose (PGMQ image) |
 | **P1** Backend | ✅ Core done | Auth, articles, regions, media, admin, danger zone, app-settings, audit, **pgmq queue** |
 | **P1b** Workers + Realtime | ✅ Done | pgmq consumer loops (media probe/transcode/poster/delete, notifications, email/SMS, scheduled publish) + **Socket.IO** gateway with Redis adapter |
-| **P2** Web (Next.js) | ✅ Done | Reader, reporter console (R01–R05), admin/super-admin console (A01–A10), auth cookies, authenticated proxy |
-| **P3** Mobile (Expo) | ⬜ Not started | |
-| **P4** Hardening | ⬜ Not started | |
+| **P2** Web (Next.js) | ✅ Done | Reader, comments, reporter console (R01–R05), admin/super-admin console (A01–A10), poster editor, auth cookies, authenticated proxy |
+| **P3** Mobile (Expo) | ✅ Done | Auth, home feed, article, categories, search, bookmarks, notifications, profile, settings; typechecks |
+| **P4** Hardening | 🟡 Partial | Vitest unit+API tests (20), CI workflow, `/metrics`; lint/Sentry/e2e pending |
 
 > **Data layer (changed from Prisma):** schema + types are defined with
 > **Drizzle ORM** (`apps/api/src/db/schema.ts`); **migrations are owned by
@@ -147,6 +147,39 @@ loops start; notification worker resolves devices without crashing; Socket.IO
 > (`FFMPEG_PATH`/`FFPROBE_PATH`); install with `apt-get install ffmpeg` (or point
 > at a binary) to enable real transcoding. Until then video uses the original as
 > the canonical source.
+
+## P3 — Expo mobile (implemented & typechecks)
+
+`apps/mobile` — Expo (managed) + React Navigation (tabs + stack) + React Query +
+Zustand + expo-secure-store:
+
+- **Navigation:** bottom tabs (Home, Categories, Bookmarks, Profile) + stack
+  (Article, Search, Notifications, Settings, Login, Signup); deep-link config
+  (`newswatch://news/<slug>`).
+- **Auth:** `expo-secure-store` tokens, `hydrate` on boot, login/signup/logout.
+- **Screens:** Home feed (pull-to-refresh), Article (media + rich text),
+  Categories, Search, Bookmarks, Notifications, Profile, Settings, Login, Signup.
+- **Theme:** from `@newswatch/tokens`; **API/queries** in `src/lib`; article cards
+  via `expo-image`.
+- Fixed during audit: `expo-constants` dep, RN vs expo-image `contentFit`, App.tsx
+  paths (`./src/...`), navigation param typing, shared `Buffer` (now base64 via
+  `btoa`/`atob` so it runs on RN/browser/Node).
+
+## P4 — Hardening (partial)
+
+- **Tests:** Vitest in `apps/api` — 20 tests (unit: slugify/wordCount/sanitize;
+  integration: envelope, 404, auth, RBAC, validation, catalogue). Run:
+  `pnpm --filter @newswatch/api test`. A routing bug (catch-all `/:username`
+  swallowing unknown routes) was found and fixed by these tests.
+- **CI:** `.github/workflows/ci.yml` — spins up PGMQ Postgres + Redis, runs
+  dbmate migrations (proving fresh-DB forward compatibility), seed, recursive
+  typecheck, API tests, API build, web build.
+- **Observability:** `GET /api/v1/metrics` reports db/redis health, ffmpeg
+  availability, memory, and pgmq queue depths per queue; `/health` (liveness) and
+  `/ready` (db+redis) per REQ-SYS-413.
+- **Fail-soft fix:** ioredis clients now have `error` handlers, so a Redis outage
+  no longer crashes the API (REQ-SYS-346).
+- **Still pending:** ESLint pass, Sentry wiring, Playwright/Detox e2e, load tests.
 
 ## Decisions (ambiguous points resolved)
 

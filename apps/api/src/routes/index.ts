@@ -14,6 +14,7 @@ import { appSettingsRouter, deviceRouter, userRouter } from "./users.routes";
 import { reporterRouter } from "./reporter.routes";
 import { adminRouter } from "./admin.routes";
 import { mediaRouter } from "./media.routes";
+import { shareRouter } from "./share.routes";
 
 export const apiRouter: Router = Router();
 
@@ -23,6 +24,7 @@ apiRouter.use("/categories", categoryRouter);
 apiRouter.use("/regions", regionRouter);
 apiRouter.use("/articles", articleRouter);
 apiRouter.use("/media", mediaRouter);
+apiRouter.use(shareRouter);
 apiRouter.use("/admin", adminRouter);
 apiRouter.use("/reporter", reporterRouter);
 apiRouter.use(appSettingsRouter);

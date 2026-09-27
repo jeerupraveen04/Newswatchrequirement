@@ -1,4 +1,5 @@
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Image } from "expo-image";
 import { theme } from "../theme";
 import { Badge } from "./ui";
 import { formatRelative, type ArticleCard } from "../lib/queries";

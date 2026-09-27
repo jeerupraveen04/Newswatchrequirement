@@ -237,6 +237,15 @@ export const followService = {
     await db.insert(follows).values({ userId: principal.id, targetType, targetId });
     return { following: true };
   },
+
+  async list(principal: Principal) {
+    const rows = await db
+      .select()
+      .from(follows)
+      .where(eq(follows.userId, principal.id))
+      .orderBy(desc(follows.createdAt));
+    return rows.map((f) => ({ targetType: f.targetType, targetId: f.targetId, since: f.createdAt }));
+  },
 };
 
 export const notificationService = {

@@ -6,7 +6,8 @@
     "moduleResolution": "bundler",
     "allowJs": true,
     "noEmit": true,
-    "types": ["react", "react-native", "expo"]
+    "declaration": false,
+    "types": ["react", "node", "expo"]
   },
   "include": ["src", "App.tsx", "app.config.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]

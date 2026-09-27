@@ -24,6 +24,9 @@ export function initRealtime(httpServer: HttpServer): SocketServer {
   try {
     const pub = new Redis(env.REDIS_URL);
     const sub = pub.duplicate();
+    // ioredis requires an 'error' handler or it crashes the process.
+    pub.on("error", (err) => logger.warn({ err }, "Socket.IO redis pub error"));
+    sub.on("error", (err) => logger.warn({ err }, "Socket.IO redis sub error"));
     io.adapter(createAdapter(pub, sub));
     logger.info("Socket.IO Redis adapter enabled");
   } catch (err) {

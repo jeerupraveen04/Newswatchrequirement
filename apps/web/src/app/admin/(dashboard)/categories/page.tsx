@@ -14,22 +14,31 @@ interface Category {
 
 export default function AdminCategoriesPage() {
   const { data, isLoading, refetch } = useApiQuery<Category[]>(["categories"], "/categories");
-  const [modal, setModal] = useState<{ name: string; slug: string; description: string; sortOrder: number } | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [modal, setModal] = useState<{ id?: string; name: string; slug: string; description: string; sortOrder: number } | null>(null);
+  const [note, setNote] = useState<string | null>(null);
 
   function create() {
     setModal({ name: "", slug: "", description: "", sortOrder: 0 });
   }
   function edit(c: Category) {
-    setModal({ name: c.name, slug: c.slug, description: c.description ?? "", sortOrder: c.sortOrder });
+    setModal({ id: c.id, name: c.name, slug: c.slug, description: c.description ?? "", sortOrder: c.sortOrder });
   }
 
   async function save() {
     if (!modal) return;
-    setError(null);
-    // Categories are read-only via public API in v1; this demonstrates the flow.
-    setError("Category writes require the admin categories endpoint (roadmap). ");
-    void refetch;
+    const body = { name: modal.name, slug: modal.slug || undefined, description: modal.description, sortOrder: modal.sortOrder };
+    const res = modal.id
+      ? await proxy(`/categories/${modal.id}`, { method: "PATCH", body })
+      : await proxy("/categories", { method: "POST", body });
+    setNote(res.ok ? (modal.id ? "Category updated." : "Category created.") : res.error?.message ?? "Failed");
+    setModal(null);
+    void refetch();
+  }
+
+  async function remove(c: Category) {
+    const res = await proxy(`/categories/${c.id}`, { method: "DELETE" });
+    setNote(res.ok ? "Category deleted." : res.error?.message ?? "Failed");
+    void refetch();
   }
 
   return (
@@ -39,6 +48,7 @@ export default function AdminCategoriesPage() {
         <button className="btn btn-primary" onClick={create}>+ New category</button>
       </div>
       <p className="page-sub">Create, reorder and manage topics.</p>
+      {note && <div className="toast-note mb-2">{note}</div>}
 
       {isLoading && <div className="skeleton" style={{ height: 100 }} />}
       {data && (
@@ -52,6 +62,7 @@ export default function AdminCategoriesPage() {
                 <td>{c.slug}</td>
                 <td className="row">
                   <button className="btn btn-ghost btn-sm" onClick={() => edit(c)}>Edit</button>
+                  <button className="btn btn-ghost btn-sm" onClick={() => remove(c)}>Delete</button>
                 </td>
               </tr>
             ))}
@@ -62,14 +73,14 @@ export default function AdminCategoriesPage() {
       {modal && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.5)", zIndex: 1200, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
           <div className="card card-pad" style={{ maxWidth: 520, width: "100%" }}>
-            <div className="section-title">{modal.name ? "Edit category" : "New category"}</div>
-            {error && <div className="toast-note mb-2" style={{ color: "var(--warning)" }}>{error}</div>}
+            <div className="section-title">{modal.id ? "Edit category" : "New category"}</div>
             <div className="field"><label>Name</label><input className="input" value={modal.name} onChange={(e) => setModal({ ...modal, name: e.target.value })} placeholder="e.g. Health" /></div>
             <div className="field"><label>Slug</label><input className="input" value={modal.slug} onChange={(e) => setModal({ ...modal, slug: e.target.value })} placeholder="health" /></div>
             <div className="field"><label>Description</label><textarea className="textarea" value={modal.description} onChange={(e) => setModal({ ...modal, description: e.target.value })} /></div>
+            <div className="field"><label>Sort order</label><input className="input" type="number" value={modal.sortOrder} onChange={(e) => setModal({ ...modal, sortOrder: Number(e.target.value) })} /></div>
             <div className="row" style={{ justifyContent: "flex-end" }}>
               <button className="btn btn-ghost" onClick={() => setModal(null)}>Cancel</button>
-              <button className="btn btn-primary" onClick={save}>Save category</button>
+              <button className="btn btn-primary" onClick={save} disabled={!modal.name.trim()}>Save category</button>
             </div>
           </div>
         </div>

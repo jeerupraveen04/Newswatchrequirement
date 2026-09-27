@@ -1,16 +1,13 @@
 import { FlatList, RefreshControl, Text, View } from "react-native";
-import { Link } from "@react-navigation/native";
-import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Link, useNavigation } from "@react-navigation/native";
 import { useFeed, type ArticleCard } from "../lib/queries";
 import { ArticleRow, ArticleTile } from "../components/article-card";
 import { ScreenshotEmpty, SkeletonRow } from "../components/ui";
 import { theme } from "../theme";
-import type { RootStackParamList } from "../navigation/types";
 
-type Props = NativeStackScreenProps<RootStackParamList, "Tabs">;
-
-export function HomeScreen({ navigation }: Props) {
+export function HomeScreen() {
   const { data, isLoading, refetch, isRefetching } = useFeed();
+  const navigation = useNavigation();
 
   function open(slug: string) {
     (navigation as unknown as { navigate: (s: string, p: object) => void }).navigate("Article", { slug });

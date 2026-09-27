@@ -41,8 +41,11 @@ userRouter.patch(
   }),
 );
 
+// Public profile by username. Constrained so it does not swallow other routes
+// (usernames are ^[a-z0-9_]{3,30}$ per the DB CHECK); unmatched paths fall
+// through to the 404 handler.
 userRouter.get(
-  "/:username",
+  "/:username([a-z0-9_]{3,30})",
   asyncHandler(async (req: Request, res: Response) => {
     const [user] = await db
       .select()

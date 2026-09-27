@@ -102,6 +102,14 @@ followRouter.post(
   }),
 );
 
+followRouter.get(
+  "/follows",
+  authenticate,
+  asyncHandler(async (req: Request, res: Response) => {
+    return respond(res, 200, await followService.list(req.user!));
+  }),
+);
+
 // ---- Notifications ----
 export const notificationRouter: Router = Router();
 
