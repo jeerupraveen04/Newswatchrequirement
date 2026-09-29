@@ -471,7 +471,7 @@ stateDiagram-v2
 
 | ID | Requirement |
 |---|---|
-| REQ-AUTH-100 | Auth abuse limits are enforced in Redis so they hold across instances |
+| REQ-AUTH-100 | Auth abuse limits are enforced in process memory (per instance; single-instance v1) |
 | REQ-AUTH-101 | Lockout is per-account and per-IP to prevent both targeted and spray attacks |
 | REQ-AUTH-102 | Repeated OTP requests to the same identifier are throttled and logged |
 | REQ-AUTH-103 | Suspicious refresh reuse immediately invalidates the family and notifies the user |
@@ -502,7 +502,7 @@ stateDiagram-v2
 | SMS provider down | OTP request returns `502 UPSTREAM_ERROR`; email OTP may be offered; login by password/OAuth still works |
 | Email provider down | Same as above; retry queued with backoff |
 | OAuth provider down | `502 UPSTREAM_ERROR`; other login methods remain available |
-| Redis down | Rate limits fail open with logging; token rotation still uses DB |
+| Cache failure | Rate limits fail open with logging; token rotation still uses DB |
 | DB down | Auth unavailable; API returns `503 SERVICE_UNAVAILABLE` |
 | Clock skew | Server validates `exp` with a small leeway (±30 s) |
 

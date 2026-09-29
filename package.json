@@ -15,7 +15,14 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\"",
     "db:up": "pnpm --filter @newswatch/api db:up",
     "db:seed": "pnpm --filter @newswatch/api db:seed",
-    "worker": "pnpm --filter @newswatch/api worker"
+    "worker": "pnpm --filter @newswatch/api worker",
+    "mobile:prebuild": "npm --prefix apps/mobile run prebuild:android",
+    "mobile:build": "npm --prefix apps/mobile run build:android",
+    "mobile:build:debug": "npm --prefix apps/mobile run build:android:debug",
+    "mobile:build:debug:emulator": "npm --prefix apps/mobile run build:android:debug:emulator",
+    "mobile:build:release:fast": "npm --prefix apps/mobile run build:android:release:fast",
+    "mobile:bundle": "npm --prefix apps/mobile run build:android:bundle",
+    "mobile:install": "npm --prefix apps/mobile run install:android"
   },
   "devDependencies": {
     "prettier": "^3.3.3",

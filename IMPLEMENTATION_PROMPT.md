@@ -40,7 +40,7 @@ Use this stack (do not substitute):
 Mobile: React Native (Expo) · Web: Next.js (React) · Backend: Node.js + Express ·
 DB: PostgreSQL · Media storage: CLOUDFLARE R2 (images + video; S3-compatible API,
 presigned uploads, multipart for large video, public bucket via Cloudflare CDN) ·
-Cache/queue: Redis + BullMQ · Realtime: Socket.IO · Auth: JWT access + refresh,
+Cache/queue: PGMQ (PostgreSQL) + in-process cache · Realtime: Socket.IO · Auth: JWT access + refresh,
 OTP, OAuth (Google/Apple) · Push: Firebase Cloud Messaging · Email/SMS: provider
 adapters. NO payments/subscriptions. NO Live TV / live streaming.
 

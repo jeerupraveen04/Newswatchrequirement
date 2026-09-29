@@ -9,7 +9,6 @@ const EnvSchema = z.object({
 
   DATABASE_URL: z.string().min(1),
   PG_POOL_MAX: z.coerce.number().default(10),
-  REDIS_URL: z.string().min(1),
 
   JWT_ACCESS_SECRET: z.string().min(8),
   JWT_REFRESH_SECRET: z.string().min(8),

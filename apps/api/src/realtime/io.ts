@@ -1,7 +1,5 @@
 import type { Server as HttpServer } from "node:http";
 import { Server as SocketServer, type Socket } from "socket.io";
-import { createAdapter } from "@socket.io/redis-adapter";
-import { Redis } from "ioredis";
 import { env } from "../config/env";
 import { logger } from "../config/logger";
 import { verifyAccessToken } from "../services/token.service";
@@ -9,7 +7,7 @@ import { verifyAccessToken } from "../services/token.service";
 /**
  * Socket.IO realtime gateway (docs/architecture/03 §13).
  * - Verifies the access token on handshake (REQ-SYS-390).
- * - Scales across instances via the Redis adapter (REQ-SYS-391).
+ * - Single-instance, in-memory adapter; no Redis dependency (REQ-SYS-391).
  * - Rooms: `article:<id>` and `user:<id>`; emits are best-effort (REQ-SYS-393).
  */
 
@@ -21,17 +19,7 @@ export function initRealtime(httpServer: HttpServer): SocketServer {
     cors: { origin: env.SOCKET_CORS_ORIGIN === "*" ? true : env.SOCKET_CORS_ORIGIN.split(",") },
   });
 
-  try {
-    const pub = new Redis(env.REDIS_URL);
-    const sub = pub.duplicate();
-    // ioredis requires an 'error' handler or it crashes the process.
-    pub.on("error", (err) => logger.warn({ err }, "Socket.IO redis pub error"));
-    sub.on("error", (err) => logger.warn({ err }, "Socket.IO redis sub error"));
-    io.adapter(createAdapter(pub, sub));
-    logger.info("Socket.IO Redis adapter enabled");
-  } catch (err) {
-    logger.warn({ err }, "Socket.IO Redis adapter unavailable; running single-instance");
-  }
+  logger.info("Socket.IO initialised with in-memory adapter (single instance)");
 
   io.use((socket, next) => {
     const token =

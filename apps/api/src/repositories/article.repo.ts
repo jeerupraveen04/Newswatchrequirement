@@ -134,6 +134,111 @@ export const articleRepo = {
     return hydrated!;
   },
 
+  /** Any article regardless of status, including the body and tags (for edit). */
+  async findByIdWithBody(id: string) {
+    const row = await this.findById(id);
+    if (!row) return null;
+    const tagRows = await db
+      .select({ name: tags.name })
+      .from(articleTags)
+      .innerJoin(tags, eq(tags.id, articleTags.tagId))
+      .where(eq(articleTags.articleId, id));
+    return { ...row, tags: tagRows.map((t) => t.name) };
+  },
+
+  async update(
+    id: string,
+    patch: Partial<{
+      title: string;
+      summary: string;
+      body: string;
+      bodyFormat: "rich" | "markdown";
+      regionId: string;
+      headlineStyle: unknown;
+      descriptionStyle: unknown;
+      poster: unknown;
+      readingMinutes: number;
+    }>,
+  ) {
+    await db
+      .update(articles)
+      .set({ ...patch, updatedAt: new Date() })
+      .where(eq(articles.id, id));
+  },
+
+  async softDelete(id: string) {
+    await db
+      .update(articles)
+      .set({ isDeleted: true, deletedAt: new Date(), status: "deleted" })
+      .where(eq(articles.id, id));
+  },
+
+  /** Replace the image set for an article (hero + gallery). */
+  async replaceMedia(articleId: string, items: Array<{ assetId: string; isHero: boolean; alt?: string | null }>) {
+    await db.delete(articleImages).where(eq(articleImages.articleId, articleId));
+    if (items.length) {
+      await db.insert(articleImages).values(
+        items.map((m, i) => ({
+          articleId,
+          mediaAssetId: m.assetId,
+          position: i,
+          isHero: m.isHero,
+          alt: m.alt ?? null,
+        })),
+      );
+    }
+    const hero = items.find((m) => m.isHero) ?? items[0];
+    await db.update(articles).set({ heroImageId: hero?.assetId ?? null }).where(eq(articles.id, articleId));
+  },
+
+  async replaceCategories(articleId: string, categoryIds: string[]) {
+    await db.delete(articleCategories).where(eq(articleCategories.articleId, articleId));
+    if (categoryIds.length) {
+      await db
+        .insert(articleCategories)
+        .values(categoryIds.map((categoryId, i) => ({ articleId, categoryId, isPrimary: i === 0 })));
+    }
+  },
+
+  async replaceTags(articleId: string, names: string[]) {
+    await db.delete(articleTags).where(eq(articleTags.articleId, articleId));
+    for (const name of names.slice(0, 10)) {
+      const slug = (await import("../utils/text")).slugify(name);
+      if (!slug) continue;
+      const [existing] = await db.select().from(tags).where(eq(tags.slug, slug)).limit(1);
+      const tag = existing ?? (await db.insert(tags).values({ name, slug }).returning())[0]!;
+      await db.insert(articleTags).values({ articleId, tagId: tag.id });
+    }
+  },
+
+  async statsForReporter(reporterId: string) {
+    const rows = await db
+      .select({
+        status: articles.status,
+        count: sql<number>`count(*)::int`,
+        views: sql<number>`coalesce(sum(${articles.viewCount}), 0)::int`,
+        likes: sql<number>`coalesce(sum(${articles.likeCount}), 0)::int`,
+      })
+      .from(articles)
+      .where(and(eq(articles.reporterId, reporterId), eq(articles.isDeleted, false)))
+      .groupBy(articles.status);
+    return rows;
+  },
+
+  async countsForReporter(reporterId: string) {
+    const rows = await db
+      .select({ status: articles.status, count: sql<number>`count(*)::int` })
+      .from(articles)
+      .where(and(eq(articles.reporterId, reporterId), eq(articles.isDeleted, false)))
+      .groupBy(articles.status);
+    const counts: Record<string, number> = { all: 0 };
+    for (const r of rows) {
+      counts[r.status] = r.count;
+      counts.all = (counts.all ?? 0) + r.count;
+    }
+    return counts;
+  },
+
   async incrementView(id: string) {
     await db
       .update(articles)

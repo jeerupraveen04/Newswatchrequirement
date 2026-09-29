@@ -386,10 +386,10 @@ via `sms.send` worker.
 Live comments, reaction updates, and notification badges.
 
 ### API / SDK
-Server `socket.io` + `@socket.io/redis-adapter`; clients `socket.io-client`.
+Server `socket.io` (in-memory adapter, single instance); clients `socket.io-client`.
 
 ### Config / env vars
-`SOCKET_PATH` (default `/socket.io`), `SOCKET_CORS_ORIGIN`, `REDIS_URL` (adapter).
+`SOCKET_PATH` (default `/socket.io`), `SOCKET_CORS_ORIGIN`.
 
 ### Behavior
 - Handshake authenticates the access token; rooms are `article:<id>`,
@@ -400,7 +400,7 @@ Server `socket.io` + `@socket.io/redis-adapter`; clients `socket.io-client`.
 ### Failure / fallback
 | Failure | Behavior |
 |---|---|
-| Redis adapter down | Single-instance only; scale impaired but cached? — logged + alert |
+| Multi-instance scaling | Not supported (in-memory adapter); single instance only |
 | Client cannot connect | UI falls back to REST; pull-to-refresh works |
 | Room emit fails | Best-effort; persisted state remains correct |
 | Auth fails on handshake | Disconnect; client stays on REST |
@@ -408,7 +408,7 @@ Server `socket.io` + `@socket.io/redis-adapter`; clients `socket.io-client`.
 | ID | Requirement |
 |---|---|
 | REQ-SYS-600 | Realtime is additive; REST is the source of truth (REQ-SYS-393) |
-| REQ-SYS-601 | Socket scaling uses the Redis adapter for multi-instance fanout |
+| REQ-SYS-601 | Socket.IO runs single-instance with the in-memory adapter (no Redis) |
 | REQ-SYS-602 | Private rooms are authorization-checked on join |
 
 ---
@@ -530,7 +530,6 @@ Map/geocoding SDK (e.g. Google Maps, Mapbox).
 | `SMS_PROVIDER`, `SMS_SENDER_ID`, `SMS_TEMPLATE_OTP_ID` | SMS | no |
 | `SMS_PROVIDER_KEY` | SMS | **yes** |
 | `SOCKET_PATH`, `SOCKET_CORS_ORIGIN` | Realtime | no |
-| `REDIS_URL` | Realtime/Queue | **yes** |
 | `VIDEO_PROCESSING_PROVIDER`, `VIDEO_ADAPTIVE_RENDITIONS` | Video processing | no |
 | `FFMPEG_PATH`, `FFPROBE_PATH`, `VIDEO_MAX_BYTES`, `VIDEO_MAX_DURATION_SEC` | Video processing | no |
 | `MUX_TOKEN_ID`, `MUX_TOKEN_SECRET`, `MUX_WEBHOOK_SECRET` | Video processing (managed) | **yes** |

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { asyncHandler, respond } from "../utils/http";
 import { pingDb } from "../config/db";
-import { pingRedis } from "../config/redis";
+import { pingCache } from "../config/cache";
 import { queue } from "../jobs/queue";
 import { ffmpeg } from "../media/ffmpeg";
 
@@ -12,13 +12,13 @@ healthRouter.get("/health", (_req, res) => {
   res.status(200).json({ success: true, data: { status: "ok", uptimeSec: Math.round(process.uptime()) }, meta: {}, error: null });
 });
 
-/** Readiness: checks DB + Redis (REQ-SYS-413). */
+/** Readiness: checks DB + in-memory cache (REQ-SYS-413). */
 healthRouter.get(
   "/ready",
   asyncHandler(async (_req, res) => {
     await pingDb();
-    await pingRedis();
-    return respond(res, 200, { status: "ready", db: "up", redis: "up" });
+    await pingCache();
+    return respond(res, 200, { status: "ready", db: "up", cache: "up" });
   }),
 );
 
@@ -35,10 +35,10 @@ healthRouter.get(
       checks.db = "down";
     }
     try {
-      await pingRedis();
-      checks.redis = "up";
+      await pingCache();
+      checks.cache = "up";
     } catch {
-      checks.redis = "down";
+      checks.cache = "down";
     }
 
     const queueNames = [

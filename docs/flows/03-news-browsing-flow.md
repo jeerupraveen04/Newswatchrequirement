@@ -237,7 +237,7 @@ Unread count badges the bell in S02; opening P17 marks items read via
 | Client memory | Current feed pages | session | Pull-to-refresh, category switch |
 | Client disk | Last feed page 1, categories, bookmarks | 15 min | TTL, logout clears |
 | CDN | Images, static assets | 24 h+ | Content hash |
-| API response cache | Trending, categories | 60 s | Redis key per query |
+| API response cache | Trending, categories | 60 s | In-memory key per query |
 
 ---
 

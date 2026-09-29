@@ -1186,7 +1186,7 @@ function slugify(input: string): string {
 | Hard delete (articles) | Super-admin only; row + dependents physically removed; media queued |
 | Cascade vs restrict | Content children cascade; `reporter_id`/`category_id`/`region_id` restrict |
 | Counters | `like_count`, `comment_count`, `bookmark_count`, `view_count`, `follower_count` updated in-transaction |
-| View count | Debounced/aggregated via Redis, flushed periodically (not per request) |
+| View count | Debounced/aggregated in process memory, flushed periodically (not per request) |
 
 | ID | Requirement |
 |---|---|

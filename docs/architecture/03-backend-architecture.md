@@ -19,7 +19,7 @@ Scope note: **no payments/subscriptions**. There is no billing module.
 | ID | Principle |
 |---|---|
 | REQ-SYS-340 | Strict layering: routes → controllers → services → repositories |
-| REQ-SYS-341 | Stateless request handling; all shared state in PostgreSQL or Redis |
+| REQ-SYS-341 | Stateless request handling; all shared state in PostgreSQL (single-instance in-memory cache for limits) |
 | REQ-SYS-342 | Validate and authorize at the edge of the request, before business logic |
 | REQ-SYS-343 | Async work never blocks the request path (queue + workers) |
 | REQ-SYS-344 | Every response uses the standard envelope (see [API](04-api.md)) |
@@ -39,7 +39,7 @@ flowchart TB
     Router --> Controller[Controllers\nparse + shape HTTP]
     Controller --> Service[Services\nbusiness rules + orchestration]
     Service --> Repo[Repositories\ndata access only]
-    Service --> Cache[Cache layer\nRedis]
+    Service --> Cache[Cache layer\nin-memory]
     Service --> Queue[Queue producer\npgmq]
     Service --> SocketP[Socket.IO publisher]
     Service --> Ext[External clients\nSMS? Email? FCM? R2?]
@@ -76,7 +76,7 @@ apps/api/
 │   ├── config/
 │   │   ├── env.ts                # env schema + validation (fail fast)
 │   │   ├── db/client.ts          # postgres.js + Drizzle
-│   │   ├── redis.ts
+│   │   ├── cache.ts              # in-process cache + rate-limit counters
 │   │   ├── logger.ts
 │   │   └── constants.ts
 │   ├── routes/
@@ -156,7 +156,7 @@ apps/api/
 │   │   │   └── analytics.worker.ts
 │   │   └── scheduler.ts          # cron registration
 │   ├── realtime/
-│   │   ├── io.ts                 # socket server + redis adapter
+│   │   ├── io.ts                 # socket server (in-memory adapter)
 │   │   ├── auth.ts               # socket handshake auth
 │   │   └── handlers/
 │   │       └── articleRoom.ts
@@ -286,7 +286,7 @@ sequenceDiagram
   participant MW as Middleware chain
   participant Ctrl as Controller
   participant Svc as Service
-  participant Cache as Redis
+  participant Cache as In-memory
   participant Repo as Repository
   participant DB as PostgreSQL
   C->>MW: GET /api/v1/feed?limit=10 (Bearer token)
@@ -568,7 +568,7 @@ flowchart LR
 | `analytics.ingest` | Client/server events | Persist `analytics_events`, aggregate counters | By event id |
 | `media.delete` | Article hard delete | Delete Cloudflare R2 objects + CDN invalidation | By asset id |
 | `poster.render` | Poster render request or template/size change (R05) | Render poster PNG (headless/canvas), store as `media_asset`, upsert `article_posters` default | By article id + template + overrides hash |
-| `feed.warm` | After publish | Warm Redis feed caches | Best effort |
+| `feed.warm` | After publish | Warm feed caches | Best effort |
 
 | ID | Requirement |
 |---|---|
@@ -600,7 +600,6 @@ invalid.
 |---|---|---|
 | Core | `NODE_ENV`, `PORT`, `API_BASE_PATH=/api/v1`, `LOG_LEVEL` | no |
 | DB | `DATABASE_URL`, `PG_POOL_MAX` | **yes** |
-| Redis | `REDIS_URL` | **yes** |
 | JWT | `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `ACCESS_TTL=15m`, `REFRESH_TTL=30d` | **yes** |
 | Storage (Cloudflare R2) | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_ENDPOINT`, `R2_PUBLIC_BASE_URL`, `R2_SIGNED_URL_TTL` | **yes** |
 | FCM | `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | **yes** |
@@ -618,39 +617,37 @@ invalid.
 
 ---
 
-## 10. Caching (Redis)
+## 10. Caching (in-process memory)
+
+> **Decision (updated):** Redis has been removed. For v1 the API runs as a single
+> instance and uses a process-local in-memory store (`apps/api/src/config/cache.ts`)
+> for rate-limit counters and readiness probing. Job transport already uses
+> PGMQ/PostgreSQL. This removes an operational dependency; the trade-off is that
+> cache/rate-limit state is **not shared across instances** and is lost on restart.
 
 ```mermaid
 flowchart LR
   Req[Read request] --> Key{Key exists?}
   Key -- yes --> Return[Serve from cache]
   Key -- no --> DB[(PostgreSQL)] --> Set[SETEX with TTL] --> Return
-  Write[Write request] --> Invalidate[Invalidate related keys\n+ tag-based purge] --> DB
+  Write[Write request] --> Invalidate[Invalidate related keys] --> DB
 ```
 
 | Cache | Key pattern | TTL | Invalidation |
 |---|---|---|---|
-| Feed page | `feed:{scope}:{limit}:{cursor}` | 30–60 s | On publish/reject/unpublish (`feed:*`) |
-| Category articles | `cat:{slug}:{limit}:{cursor}` | 60 s | On article publish in category |
-| Article body | `article:{slug}` | 300 s | On article update/publish/unpublish |
-| Categories list | `categories:all` | 600 s | On category CRUD |
-| Search results | `search:{hash(q+filters)}` | 60 s | Time-based only |
-| Counters (likes/comments) | `count:{type}:{id}` | 30 s | On reaction/comment write |
-| Rate limit counters | `rl:{scope}:{key}` | window | Automatic |
-| Socket.io rooms | Redis pub/sub adapter | — | — |
+| Rate limit counters | `rl:{scope}:{key}` | window | Automatic (TTL) |
 
 | ID | Requirement |
 |---|---|
-| REQ-SYS-370 | Cache is read-through for reads; write-through invalidation by tag on writes |
+| REQ-SYS-370 | Cache is read-through for reads; invalidation on writes |
 | REQ-SYS-371 | Cache failures degrade to DB reads; never fail the request (REQ-SYS-346) |
-| REQ-SYS-372 | Key versioning (`v1:`) allows safe schema changes without stale reads |
-| REQ-SYS-373 | Per-user personalized responses are not cached in shared cache |
+| REQ-SYS-373 | Per-user personalized responses are not cached in a shared cache |
 
 ---
 
 ## 11. Rate limiting
 
-Layered, using Redis token buckets.
+Layered fixed-window counters held in process memory (single instance).
 
 | Scope | Key | Default limit | Applied to |
 |---|---|---|---|
@@ -667,7 +664,7 @@ Layered, using Redis token buckets.
 |---|---|
 | REQ-SYS-380 | Exceeded limits return `429 RATE_LIMITED` with `Retry-After` |
 | REQ-SYS-381 | OTP requests are limited per identifier AND per IP to stop SMS abuse |
-| REQ-SYS-382 | Rate limit state lives in Redis so limits hold across instances |
+| REQ-SYS-382 | Rate limit state is process-local (per instance); limits do not hold across instances |
 
 ---
 
@@ -748,15 +745,13 @@ successful handler; it never blocks the response on audit failure but alerts.
 sequenceDiagram
   participant Client
   participant GW as Socket.IO server
-  participant Redis as Redis adapter
   participant Svc as Services (via emitter)
   Client->>GW: connect (auth.token)
   GW->>GW: verify JWT -> socket.data.user
   GW-->>Client: connected
   Client->>GW: join article:<id>
   GW-->>Client: joined
-  Svc->>Redis: publish comment:new (room article:<id>)
-  Redis->>GW: fanout
+  Svc->>GW: emit comment:new (room article:<id>)
   GW-->>Client: comment:new
   Client->>GW: disconnect
 ```
@@ -769,7 +764,7 @@ sequenceDiagram
 | ID | Requirement |
 |---|---|
 | REQ-SYS-390 | Socket handshake verifies the access token; invalid → disconnect with error |
-| REQ-SYS-391 | Horizontal scaling via `@socket.io/redis-adapter` |
+| REQ-SYS-391 | Single-instance deployment uses the in-memory adapter; no Redis dependency |
 | REQ-SYS-392 | Rooms are authorization-checked on join where private |
 | REQ-SYS-393 | Realtime emits are best-effort; REST remains the source of truth |
 | REQ-SYS-394 | Rate-limit socket events per connection |
@@ -839,7 +834,7 @@ restarting the whole file, and completion is idempotent by `uploadId`.
 | Structured logs | pino (JSON) | `requestId`, `correlationId`, `userId`, route, latency |
 | Errors | Sentry | 5xx and unhandled exceptions; no PII |
 | Metrics | Prometheus-style counters/histograms or hosted APM | RPS, latency p95, error rate, queue depth, DB pool |
-| Health | `/health` (liveness), `/ready` (DB+Redis ping) | For LB/orchestrator |
+| Health | `/health` (liveness), `/ready` (DB + cache ping) | For LB/orchestrator |
 | Tracing | correlationId propagation | Across API → workers → integrations |
 
 | ID | Requirement |
@@ -847,7 +842,7 @@ restarting the whole file, and completion is idempotent by `uploadId`.
 | REQ-SYS-410 | Every log line includes `requestId` and route; 5xx logs include stack |
 | REQ-SYS-411 | Never log tokens, passwords, OTPs, or full request bodies with PII |
 | REQ-SYS-412 | Alert on error rate, p95 latency, queue backlog, and DB connection saturation |
-| REQ-SYS-413 | `/health` returns 200 without touching dependencies; `/ready` checks DB + Redis |
+| REQ-SYS-413 | `/health` returns 200 without touching dependencies; `/ready` checks DB + cache |
 
 ### 15.1 Log shape (excerpt)
 
@@ -898,8 +893,6 @@ flowchart LR
   Reg --> Worker[Worker containers x M]
   API --> LB[Load balancer / ingress]
   LB --> DB[(PostgreSQL primary + read replica)]
-  API --> RDS[(Redis)]
-  Worker --> RDS2[(Redis)]
   API --> R2[(Cloudflare R2)]
   Cron[Cron scheduler] --> Worker
   LB --> Metrics[Metrics/Logs/Sentry]

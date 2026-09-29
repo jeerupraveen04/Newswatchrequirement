@@ -194,11 +194,34 @@ export const bookmarkService = {
 
   async list(principal: Principal) {
     const rows = await db
-      .select()
+      .select({
+        bookmarkedAt: bookmarks.createdAt,
+        articleId: bookmarks.articleId,
+        title: articles.title,
+        slug: articles.slug,
+        summary: articles.summary,
+        heroImageId: articles.heroImageId,
+        viewCount: articles.viewCount,
+        publishedAt: articles.publishedAt,
+        status: articles.status,
+      })
       .from(bookmarks)
+      .innerJoin(articles, eq(articles.id, bookmarks.articleId))
       .where(eq(bookmarks.userId, principal.id))
       .orderBy(desc(bookmarks.createdAt));
-    return rows.map((r) => ({ bookmarkedAt: r.createdAt, articleId: r.articleId }));
+    return rows.map((r) => ({
+      articleId: r.articleId,
+      bookmarkedAt: r.bookmarkedAt,
+      article: {
+        id: r.articleId,
+        slug: r.slug,
+        title: r.title,
+        summary: r.summary,
+        viewCount: r.viewCount,
+        publishedAt: r.publishedAt,
+        status: r.status,
+      },
+    }));
   },
 };
 

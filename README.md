@@ -48,7 +48,7 @@ product decision is left ambiguous.
 | Auth | JWT access + refresh tokens, OTP login, OAuth (Google/Apple) |
 | Push notifications | Firebase Cloud Messaging (FCM) |
 | Realtime | WebSocket / Socket.IO (live comments) |
-| Cache | Redis |
+| Cache | In-process memory (single instance; no Redis) |
 | Analytics | Firebase Analytics + backend events |
 
 See [`docs/architecture/00-overview.md`](docs/architecture/00-overview.md) for the

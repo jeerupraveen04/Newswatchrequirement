@@ -9,7 +9,7 @@ Phases mirror the `IMPLEMENTATION_PROMPT.md` build order.
 |---|---|---|
 | **P0** Foundation | ✅ Done | Monorepo, **Drizzle schema (types only)**, **dbmate migrations**, seed, docker-compose (PGMQ image) |
 | **P1** Backend | ✅ Core done | Auth, articles, regions, media, admin, danger zone, app-settings, audit, **pgmq queue** |
-| **P1b** Workers + Realtime | ✅ Done | pgmq consumer loops (media probe/transcode/poster/delete, notifications, email/SMS, scheduled publish) + **Socket.IO** gateway with Redis adapter |
+| **P1b** Workers + Realtime | ✅ Done | pgmq consumer loops (media probe/transcode/poster/delete, notifications, email/SMS, scheduled publish) + **Socket.IO** gateway (in-memory adapter) |
 | **P2** Web (Next.js) | ✅ Done | Reader, comments, reporter console (R01–R05), admin/super-admin console (A01–A10), poster editor, auth cookies, authenticated proxy |
 | **P3** Mobile (Expo) | ✅ Done | Auth, home feed, article, categories, search, bookmarks, notifications, profile, settings; typechecks |
 | **P4** Hardening | 🟡 Partial | Vitest unit+API tests (20), CI workflow, `/metrics`; lint/Sentry/e2e pending |
@@ -28,7 +28,7 @@ apps/mobile       Expo (pending)
 packages/shared   Types, Zod schemas, error codes, cursor helpers
 packages/tokens   Design tokens (docs/design-system/00-tokens.md)
 packages/config   Shared tsconfig/eslint/prettier
-infra/            docker-compose (Postgres, Redis, MinIO)
+infra/            docker-compose (Postgres, MinIO)
 ```
 
 ## What is implemented and verified (P0 + P1)
@@ -126,7 +126,7 @@ Retry/dead-letter: messages retry via pgmq visibility timeout up to `maxAttempts
 
 **Socket.IO** (`src/realtime/io.ts`, initialised in `server.ts`):
 - Handshake verifies the JWT (guests allowed for public rooms)
-- Redis adapter for multi-instance fan-out
+- In-memory adapter (single instance; no Redis)
 - Rooms `article:<id>` and `user:<id>`; events `comment:new`, `comment:updated`,
   `comment:deleted`, `reaction:update`, `comment:count`, `notification:new`,
   `article:status`. Comments emit `comment:new` on create.
@@ -151,19 +151,53 @@ loops start; notification worker resolves devices without crashing; Socket.IO
 ## P3 — Expo mobile (implemented & typechecks)
 
 `apps/mobile` — Expo (managed) + React Navigation (tabs + stack) + React Query +
-Zustand + expo-secure-store:
+Zustand + expo-secure-store.
 
-- **Navigation:** bottom tabs (Home, Categories, Bookmarks, Profile) + stack
-  (Article, Search, Notifications, Settings, Login, Signup); deep-link config
-  (`newswatch://news/<slug>`).
-- **Auth:** `expo-secure-store` tokens, `hydrate` on boot, login/signup/logout.
-- **Screens:** Home feed (pull-to-refresh), Article (media + rich text),
-  Categories, Search, Bookmarks, Notifications, Profile, Settings, Login, Signup.
-- **Theme:** from `@newswatch/tokens`; **API/queries** in `src/lib`; article cards
-  via `expo-image`.
+**Coverage (rebuilt end-to-end after an audit found only 10 shallow screens for
+27 mobile pages):**
+
+| Area | Pages implemented |
+|---|---|
+| Auth | P01 Splash, P02 Onboarding, P03 Login, P04 Signup, P05 OTP, P06 Forgot/Reset |
+| Reader | P07 Home feed (category chips), P08 News Listing (scroll-snap), P09 Article (action bar + tags), P10 Categories, P11 Category Listing, P12/P13 Search, P15 Bookmarks, P16 Comments, P17 Notifications, P18 Profile, P19 Edit Profile, P20 Settings, P21 About |
+| Reporter | R01 Dashboard, R02 Article Composer (create/edit), R03 My Articles, R04 Application, R05 Share Poster |
+| Shell | S02 bottom tabs (Home, Categories, Search, Bookmarks, Profile) + stack |
+
+- **Navigation:** typed `navigation.navigate(...)` everywhere (no `<Link>`), all
+  routes registered in `RootNavigator.tsx`, lowercase deep-link paths in
+  `linking.ts`.
+- **Auth:** `expo-secure-store` tokens, refresh-on-hydrate, OTP + forgot/reset
+  flows, reporter-status aware.
+- **Lib:** `api.ts` supports query params + full envelope (`apiPage`) for cursor
+  meta; `queries.ts` covers feed/articles/categories/comments/bookmarks/notifs/
+  reporter CRUD/like/bookmark with React Query invalidation.
 - Fixed during audit: `expo-constants` dep, RN vs expo-image `contentFit`, App.tsx
-  paths (`./src/...`), navigation param typing, shared `Buffer` (now base64 via
-  `btoa`/`atob` so it runs on RN/browser/Node).
+  paths (`./src/...`), navigation param typing, shared `Buffer`.
+- **Navigation bug fixed:** screens used `<Link to="/Login">` (capitalised) while
+  the linking config mapped lowercase `login`/`signup`, so tapping Login/Signup
+  produced an unparseable path and exited the app. All in-app navigation now uses
+  typed `navigation.navigate(...)`.
+- **Form components:** `components/form.tsx` (`TextField`, `PasswordField` with
+  show/hide, `PrimaryButton`, `FormError`).
+
+### Backend additions for the reporter flow
+
+`apps/api` gained endpoints the composer needed (all under `/api/v1/reporter`):
+
+| Method | Path | Purpose |
+|---|---|---|
+| POST | `/reporter/articles` | create draft (approved reporters) |
+| GET | `/reporter/articles/:id` | full article (any status) for edit |
+| PATCH | `/reporter/articles/:id` | update draft/rejected |
+| DELETE | `/reporter/articles/:id` | soft-delete own draft/rejected |
+| POST | `/reporter/articles/:id/submit` | submit for review |
+| GET | `/reporter/stats` | dashboard aggregates |
+| GET | `/reporter/counts` | per-status counts for R03 pills |
+
+`POST /reporter/apply` is now open to **any authenticated user** (previously the
+router-level `requireRole` blocked normal users, so R04 was unreachable). The
+remaining reporter routes keep `requireRole("reporter","admin","super_admin")`.
+`GET /bookmarks` now hydrates article rows (title/slug/summary) instead of IDs.
 
 ## P4 — Hardening (partial)
 
@@ -171,14 +205,15 @@ Zustand + expo-secure-store:
   integration: envelope, 404, auth, RBAC, validation, catalogue). Run:
   `pnpm --filter @newswatch/api test`. A routing bug (catch-all `/:username`
   swallowing unknown routes) was found and fixed by these tests.
-- **CI:** `.github/workflows/ci.yml` — spins up PGMQ Postgres + Redis, runs
+- **CI:** `.github/workflows/ci.yml` — spins up PGMQ Postgres, runs
   dbmate migrations (proving fresh-DB forward compatibility), seed, recursive
   typecheck, API tests, API build, web build.
-- **Observability:** `GET /api/v1/metrics` reports db/redis health, ffmpeg
+- **Observability:** `GET /api/v1/metrics` reports db/cache health, ffmpeg
   availability, memory, and pgmq queue depths per queue; `/health` (liveness) and
-  `/ready` (db+redis) per REQ-SYS-413.
-- **Fail-soft fix:** ioredis clients now have `error` handlers, so a Redis outage
-  no longer crashes the API (REQ-SYS-346).
+  `/ready` (db+cache) per REQ-SYS-413.
+- **No external cache:** Redis was removed; rate limits and readiness use a
+  process-local in-memory store (`src/config/cache.ts`). Jobs already used PGMQ.
+  Single-instance only (REQ-SYS-346 fail-soft).
 - **Still pending:** ESLint pass, Sentry wiring, Playwright/Detox e2e, load tests.
 
 ## Decisions (ambiguous points resolved)
@@ -212,8 +247,8 @@ Zustand + expo-secure-store:
 # 1. install
 corepack enable && pnpm install
 
-# 2. infra (uses mapped ports 55432/56379 to avoid host conflicts)
-docker compose -f infra/docker-compose.yml up -d postgres redis
+# 2. infra (uses mapped port 55432 to avoid host conflicts)
+docker compose -f infra/docker-compose.yml up -d postgres
 
 # 3. env + db
 cp apps/api/.env.example apps/api/.env
@@ -233,5 +268,5 @@ Seed logins (password `Password123!`):
 `super@newswatch.app`, `admin@newswatch.app`, `reporter@newswatch.app`,
 `user@newswatch.app`.
 
-> Note: local Postgres/Redis run on host ports **55432** and **56379** to avoid
-> clashing with other services on this machine; see `infra/docker-compose.yml`.
+> Note: local Postgres runs on host port **55432** to avoid clashing with other
+> services on this machine; see `infra/docker-compose.yml`.

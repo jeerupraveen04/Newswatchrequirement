@@ -175,6 +175,86 @@ export const articleService = {
     return toArticleCard((await articleRepo.findById(article.id))!);
   },
 
+  /** Full article (any status) for the owner, used to populate the composer. */
+  async getForEdit(principal: Principal, articleId: string) {
+    const article = await articleRepo.findByIdWithBody(articleId);
+    if (!article) throw new AppError(ErrorCode.ARTICLE_NOT_FOUND, 404);
+    if (article.reporterId !== principal.id && !["admin", "super_admin"].includes(principal.role)) {
+      throw new AppError(ErrorCode.FORBIDDEN, 403);
+    }
+    return {
+      ...toArticleCard(article),
+      body: article.body,
+      bodyFormat: article.bodyFormat,
+      tags: article.tags,
+    };
+  },
+
+  async updateDraft(
+    principal: Principal,
+    articleId: string,
+    input: {
+      title?: string;
+      summary?: string;
+      body?: string;
+      bodyFormat?: "rich" | "markdown";
+      regionId?: string;
+      categoryIds?: string[];
+      tags?: string[];
+      headlineStyle?: unknown;
+      descriptionStyle?: unknown;
+      poster?: unknown;
+      media?: Array<{ assetId: string; isHero: boolean; alt?: string | null }>;
+    },
+  ) {
+    const [existing] = await db.select().from(articles).where(eq(articles.id, articleId)).limit(1);
+    if (!existing) throw new AppError(ErrorCode.ARTICLE_NOT_FOUND, 404);
+    if (existing.reporterId !== principal.id) throw new AppError(ErrorCode.FORBIDDEN, 403);
+    if (!["draft", "rejected"].includes(existing.status)) {
+      throw new AppError(ErrorCode.INVALID_STATUS_TRANSITION, 409);
+    }
+    const regionId = input.regionId ?? existing.regionId;
+    if (!actorInScope(principal, regionId)) throw new AppError(ErrorCode.OUT_OF_SCOPE, 403);
+
+    const body = input.body !== undefined ? sanitizeRichText(input.body) : undefined;
+    await articleRepo.update(articleId, {
+      ...(input.title !== undefined ? { title: input.title } : {}),
+      ...(input.summary !== undefined ? { summary: input.summary } : {}),
+      ...(body !== undefined ? { body, readingMinutes: readingMinutes(body) } : {}),
+      ...(input.bodyFormat !== undefined ? { bodyFormat: input.bodyFormat } : {}),
+      ...(input.regionId !== undefined ? { regionId: input.regionId } : {}),
+      ...(input.headlineStyle !== undefined ? { headlineStyle: input.headlineStyle } : {}),
+      ...(input.descriptionStyle !== undefined ? { descriptionStyle: input.descriptionStyle } : {}),
+      ...(input.poster !== undefined ? { poster: input.poster } : {}),
+    });
+    if (input.categoryIds) await articleRepo.replaceCategories(articleId, input.categoryIds);
+    if (input.tags) await articleRepo.replaceTags(articleId, input.tags);
+    if (input.media) await articleRepo.replaceMedia(articleId, input.media);
+    return toArticleCard((await articleRepo.findById(articleId))!);
+  },
+
+  async removeDraft(principal: Principal, articleId: string) {
+    const [article] = await db.select().from(articles).where(eq(articles.id, articleId)).limit(1);
+    if (!article) throw new AppError(ErrorCode.ARTICLE_NOT_FOUND, 404);
+    if (article.reporterId !== principal.id) throw new AppError(ErrorCode.FORBIDDEN, 403);
+    if (article.status === "published") {
+      throw new AppError(ErrorCode.VALIDATION_ERROR, 422, "Published articles cannot be deleted here");
+    }
+    await articleRepo.softDelete(articleId);
+    return { deleted: true };
+  },
+
+  async reporterStats(principal: Principal) {
+    const rows = await articleRepo.statsForReporter(principal.id);
+    const stats = { published: 0, pending: 0, draft: 0, rejected: 0, unpublished: 0, views: 0, likes: 0 };
+    for (const r of rows) {
+      if (r.status in stats) (stats as Record<string, number>)[r.status] = r.count;
+      stats.views += r.views;
+      stats.likes += r.likes;
+    }
+    return stats;
+  },
+
   async submit(principal: Principal, articleId: string) {
     const [article] = await db.select().from(articles).where(eq(articles.id, articleId)).limit(1);
     if (!article) throw new AppError(ErrorCode.ARTICLE_NOT_FOUND, 404);

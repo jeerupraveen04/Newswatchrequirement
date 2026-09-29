@@ -7,7 +7,7 @@ realtime, file upload, and push notification delivery.
 | Field | Value |
 |---|---|
 | Clients | React Native (Expo) mobile, React/Next.js web, Admin web |
-| Backend | Node.js + Express, PostgreSQL, Redis, Socket.IO |
+| Backend | Node.js + Express, PostgreSQL, Socket.IO |
 | Base URL | `/api/v1` |
 | Requirement areas | `SYS`, `AUTH`, `NOTIF`, and all feature areas |
 
@@ -41,7 +41,7 @@ flowchart LR
   CT --> SV[Service layer]
   SV --> RP[Repository / ORM]
   RP --> DB[(PostgreSQL)]
-  SV --> RD[(Redis cache)]
+  SV --> RD[(in-memory cache)]
   SV --> R2[(Cloudflare R2)]
   SV --> WS[Socket.IO emitter]
   SV --> FCM[FCM sender]
@@ -85,7 +85,7 @@ sequenceDiagram
   participant MW as Middleware
   participant CT as FeedController
   participant SV as FeedService
-  participant RD as Redis
+  participant RD as In-memory cache
   participant DB as PostgreSQL
 
   App->>GW: GET /api/v1/feed?cursor=&limit=10<br/>Authorization: Bearer <access>
@@ -193,16 +193,15 @@ resolution. The refresh endpoint itself is never retried on 401.
 |---|---|---|---|
 | Client memory | feed/list pages | session | refresh, filter change |
 | Client disk | last feed page, categories, bookmarks meta | 15 min | TTL, logout |
-| Redis | `feed:{cursor}`, `trending`, `categories`, `article:{id}` | 60 s | publish/moderate, category change |
+| In-memory | rate-limit counters, hot keys | window | publish/moderate, category change |
 | CDN | images, static JS/CSS | long | content hash change |
 | HTTP | `Cache-Control: public, max-age=60` for public GETs | 60 s | — |
 | HTTP authed GETs | `Cache-Control: private, no-store` | — | never cached at edge |
 
 Cache rules:
 
-- User-specific data is never cached in shared Redis keys.
-- Mutations invalidate related Redis keys (publish → clear `feed:*`,
-  `article:{id}`, `trending`).
+- User-specific data is never cached in shared keys.
+- Mutations invalidate related cache keys.
 - Cache stampede is mitigated with a short lock + serve-stale on lock contention.
 
 ---
@@ -506,6 +505,6 @@ app is foregrounded, it shows an in-app toast and updates the P17 badge.
 ## 16. Open questions
 
 - Do we need GraphQL or REST-only in v1? (Assumed REST.)
-- Is Redis mandatory for v1 or can we launch with in-process cache?
-- Should Socket.IO scale via Redis adapter or a managed pub/sub from day one?
+- (Resolved) v1 launches with a process-local in-memory cache; Redis removed.
+- (Resolved) Socket.IO runs single-instance with the in-memory adapter.
 - Do we require request signing for financial-grade security? (Out of scope: no payments.)

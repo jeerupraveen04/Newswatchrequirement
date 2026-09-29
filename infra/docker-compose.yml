@@ -16,17 +16,6 @@ services:
       timeout: 5s
       retries: 10
 
-  redis:
-    image: redis:7-alpine
-    container_name: newswatch-redis
-    ports:
-      - "56379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   # Local S3-compatible storage to stand in for Cloudflare R2 in dev.
   minio:
     image: quay.io/minio/minio:latest

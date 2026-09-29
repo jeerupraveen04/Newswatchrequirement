@@ -40,8 +40,7 @@ flowchart LR
   end
 
   subgraph Data
-    PG[("PostgreSQL\nprimary datastore")]
-    REDIS[("Redis\ncache + queue + pub/sub")]
+    PG[("PostgreSQL\nprimary datastore\n+ PGMQ queue")]
     R2[("Cloudflare R2\nobject storage\nimages + media")]
   end
 
@@ -62,10 +61,8 @@ flowchart LR
   M <--> WS
   W <--> WS
   API --> PG
-  API --> REDIS
   API --> R2
   JOBS --> PG
-  JOBS --> REDIS
   JOBS --> R2
   API --> FCM
   API --> SMS
@@ -135,7 +132,7 @@ flowchart TB
     Routes --> MW["Middleware chain\n(auth, rbac, regionScope,\nsuperAdminGuard, auditLog)"]
     MW --> Controllers --> Services --> Repos
     Repos --> PGx[(PostgreSQL\n+ regions tree\n+ audit_logs)]
-    Services --> Cache[(Redis)]
+    Services --> Cache[(in-memory cache)]
     Services --> ObjectStore[(Cloudflare R2)]
     Services --> Realtime["Socket.IO"]
     Services --> Queue["Job queue"]
@@ -154,7 +151,7 @@ flowchart TB
 
 | Environment | Purpose | Data | Base URL | Notes |
 |---|---|---|---|---|
-| **dev** | Local developer machines | Seeded/fake | `http://localhost:4000/api/v1` | Docker Compose for PG + Redis + MinIO |
+| **dev** | Local developer machines | Seeded/fake | `http://localhost:4000/api/v1` | Docker Compose for PG + MinIO |
 | **staging** | Pre-production QA, EAS internal builds | Anonymised copy or seed | `https://staging-api.newswatch.app/api/v1` | Mirrors prod config; test OAuth/FCM projects |
 | **prod** | Live users | Real | `https://api.newswatch.app/api/v1` | HA, backups, alerting |
 
@@ -190,9 +187,9 @@ Requirement IDs in the `SYS` area are used for cross-cutting platform concerns.
 | ID | Requirement |
 |---|---|
 | REQ-SYS-010 | All API instances stateless; horizontal scale behind a load balancer |
-| REQ-SYS-011 | Session/refresh state in PostgreSQL; cache in Redis (not in-process) |
+| REQ-SYS-011 | Session/refresh state in PostgreSQL; cache is process-local in-memory (v1) |
 | REQ-SYS-012 | Pagination is cursor-based on every list endpoint (no offset scans) |
-| REQ-SYS-013 | Socket.IO scales via Redis adapter across instances |
+| REQ-SYS-013 | Socket.IO uses the in-memory adapter (single instance) |
 | REQ-SYS-014 | Background work is off the request path (queue + workers) |
 | REQ-SYS-015 | Database read replicas for feed/search-heavy reads (phase 2) |
 
@@ -267,7 +264,7 @@ Requirement IDs in the `SYS` area are used for cross-cutting platform concerns.
 | ORM/schema | Drizzle ORM (schema + types only) | Typed queries; **no DDL generation** |
 | Migrations | dbmate (plain SQL, forward-only) | Versioned migrations owned by the team |
 | Queue/jobs | pgmq (PostgreSQL message queue extension) | No extra broker; transactional enqueue |
-| Cache | Redis | Cache + Socket.IO adapter |
+| Cache | In-process memory (v1) | Rate-limit counters + readiness; no external broker |
 | Realtime | Socket.IO | Live comments (realtime) |
 | Storage | Cloudflare R2 (S3 API compatibility; MinIO in dev) | Presigned PUT/GET uploads, public bucket behind Cloudflare CDN, zero egress fees |
 | Auth | JWT (access+refresh), OTP, OAuth Google/Apple | Spec-mandated |
@@ -297,7 +294,7 @@ newswatch/
 │   ├── tokens/          # Design tokens -> CSS vars + RN theme
 │   └── config/          # eslint/tsconfig presets
 ├── infra/
-│   ├── docker-compose.yml   # local PG + Redis + MinIO
+│   ├── docker-compose.yml   # local PG + MinIO
 │   ├── migrations/          # dbmate SQL migrations + pgmq setup
 │   └── deploy/              # IaC / container manifests
 ├── docs/                    # THIS documentation repo (spec)
@@ -341,7 +338,7 @@ newswatch/
 | D4 | Server-side RBAC authoritative | Clients may hide UI, but API rejects forbidden actions |
 | D5 | Article status is a state machine | Draft → Pending → Published/Rejected; audited in `article_status_history` |
 | D6 | PostgreSQL full-text (`tsvector`) for v1 search | No external search cluster required initially |
-| D7 | Redis for cache + queue + Socket.IO adapter | One operational dependency, three roles |
+| D7 | No external cache/broker: PGMQ queue + in-process cache + in-memory Socket.IO adapter | Fewer operational dependencies |
 | D8 | Media always served via CDN with signed uploads | Fast images; upload abuse protection |
 | D9 | Realtime is additive, never required | Reading/engagement work if WebSocket drops (REQ-SYS-032) |
 | D10 | UUID v4 identifiers | Opaque, decentralised ID generation (per conventions) |

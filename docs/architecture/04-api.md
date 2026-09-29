@@ -1569,7 +1569,7 @@ Remote config for clients.
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
 | GET | `/health` | none | Liveness (no dependencies) |
-| GET | `/ready` | none | Readiness (DB + Redis) |
+| GET | `/ready` | none | Readiness (DB + cache) |
 | GET | `/version` | none | API version + build SHA |
 
 Success `200` (health): `{ "success": true, "data": { "status": "ok" }, "meta": {}, "error": null }`.
