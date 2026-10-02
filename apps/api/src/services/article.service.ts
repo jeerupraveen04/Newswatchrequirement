@@ -9,6 +9,7 @@ import { auditRepo } from "../repositories/audit.repo";
 import { articleCategories, articleTags, articles, tags } from "../db/schema";
 import { readingMinutes, slugify, wordCount } from "../utils/text";
 import { actorInScope, type Principal } from "../middleware/auth";
+import { notificationService } from "./engagement.service";
 
 const SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
   allowedTags: [
@@ -316,7 +317,22 @@ export const articleService = {
       targetId: articleId,
       meta: { note: note ?? null },
     });
-    return toArticleCard((await articleRepo.findById(articleId))!);
+    // Notify the reporter of the moderation outcome (REQ-NOTIF).
+    if (article.reporterId && article.reporterId !== principal.id) {
+      await notificationService
+        .create({
+          userId: article.reporterId,
+          type: "reporter_article_status",
+          title: action === "publish" ? "Your article was published" : action === "reject" ? "Changes requested" : "Article unpublished",
+          body: note ?? article.title,
+          entityType: "article",
+          entityId: articleId,
+          deepLink: `newswatch://news/${article.slug}`,
+        })
+        .catch(() => undefined);
+    }
+    const card = toArticleCard((await articleRepo.findById(articleId))!);
+    return card;
   },
 
   async uniqueSlug(title: string): Promise<string> {

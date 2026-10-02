@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
 import { useAuth } from "../lib/auth";
-import { useComments, usePostComment, formatRelative, type Comment } from "../lib/queries";
+import { useComments, usePostComment, useToggleLike, formatRelative, type Comment } from "../lib/queries";
 import { theme } from "../theme";
 import { ScreenshotEmpty } from "../components/ui";
 import type { RootStackNavigation, RootStackParamList } from "../navigation/types";
@@ -14,6 +14,7 @@ export function CommentsScreen() {
   const user = useAuth((s) => s.user);
   const { data, isLoading, refetch, isRefetching } = useComments(articleId);
   const post = usePostComment(articleId);
+  const like = useToggleLike();
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<Comment | null>(null);
 
@@ -40,6 +41,10 @@ export function CommentsScreen() {
             onReply={(c) => {
               if (!user) return navigation.navigate("Login");
               setReplyTo(c);
+            }}
+            onLike={(c) => {
+              if (!user) return navigation.navigate("Login");
+              like.mutate({ targetType: "comment", targetId: c.id });
             }}
           />
         )}
@@ -77,7 +82,17 @@ export function CommentsScreen() {
   );
 }
 
-function CommentRow({ comment, depth, onReply }: { comment: Comment; depth: number; onReply: (c: Comment) => void }) {
+function CommentRow({
+  comment,
+  depth,
+  onReply,
+  onLike,
+}: {
+  comment: Comment;
+  depth: number;
+  onReply: (c: Comment) => void;
+  onLike: (c: Comment) => void;
+}) {
   return (
     <View style={{ marginLeft: depth * 20, marginBottom: theme.spacing[3] }}>
       <View style={styles.commentHead}>
@@ -86,11 +101,16 @@ function CommentRow({ comment, depth, onReply }: { comment: Comment; depth: numb
         <Text style={styles.time}>· {formatRelative(comment.createdAt)}</Text>
       </View>
       <Text style={styles.body}>{comment.body}</Text>
-      <Pressable onPress={() => onReply(comment)} style={{ marginTop: 4 }}>
-        <Text style={styles.replyAction}>Reply</Text>
-      </Pressable>
+      <View style={{ flexDirection: "row", gap: 16, marginTop: 4 }}>
+        <Pressable onPress={() => onLike(comment)}>
+          <Text style={styles.replyAction}>{"\u2661"} {comment.likeCount > 0 ? comment.likeCount : "Like"}</Text>
+        </Pressable>
+        <Pressable onPress={() => onReply(comment)}>
+          <Text style={styles.replyAction}>Reply</Text>
+        </Pressable>
+      </View>
       {comment.replies?.map((r) => (
-        <CommentRow key={r.id} comment={r} depth={depth + 1} onReply={onReply} />
+        <CommentRow key={r.id} comment={r} depth={depth + 1} onReply={onReply} onLike={onLike} />
       ))}
     </View>
   );

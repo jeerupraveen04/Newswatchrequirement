@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Image as RNImage, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
 import { useQueryClient } from "@tanstack/react-query";
 import { api } from "../lib/api";
+import { pickAndUpload, type UploadedMedia } from "../lib/media";
 import { useCategories, useReporterArticle, useReporterRegions, stripHtml, wordCount } from "../lib/queries";
 import { theme } from "../theme";
 import { FormError, PrimaryButton, TextField } from "../components/form";
@@ -25,6 +26,8 @@ export function ArticleComposerScreen() {
   const [regionId, setRegionId] = useState<string | null>(null);
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [tags, setTags] = useState("");
+  const [hero, setHero] = useState<UploadedMedia | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -36,6 +39,11 @@ export function ArticleComposerScreen() {
       setCategoryIds(existing.categories.map((c) => c.id));
       setTags(existing.tags.join(", "));
       setRegionId((existing as unknown as { region?: { id: string } }).region?.id ?? null);
+      const media = (existing as unknown as { media?: Array<{ id: string; kind: "image" | "video"; url: string | null; isHero: boolean }> }).media;
+      const existingHero = media?.find((m) => m.isHero) ?? media?.[0];
+      if (existingHero) {
+        setHero({ assetId: existingHero.id, kind: existingHero.kind, url: existingHero.url, localUri: existingHero.url ?? "" });
+      }
     }
   }, [existing]);
 
@@ -49,6 +57,19 @@ export function ArticleComposerScreen() {
 
   function toggleCategory(id: string) {
     setCategoryIds((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
+  }
+
+  async function addHero() {
+    setUploading(true);
+    setError(null);
+    try {
+      const media = await pickAndUpload("image", "hero");
+      if (media) setHero(media);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function save(submitForReview: boolean) {
@@ -69,14 +90,18 @@ export function ArticleComposerScreen() {
       regionId,
       categoryIds,
       tags: tags.split(",").map((t) => t.trim()).filter(Boolean).slice(0, 10),
+      ...(hero ? { media: [{ assetId: hero.assetId, isHero: true }] } : {}),
     };
     try {
       let id = articleId;
       if (editing && id) {
         await api(`/reporter/articles/${id}`, { method: "PATCH", body: payload });
       } else {
-        const created = await api<{ id: string }>("/reporter/articles", { method: "POST", body: payload });
+        const { media: _media, ...createBody } = payload;
+        const created = await api<{ id: string }>("/reporter/articles", { method: "POST", body: createBody });
         id = created.id;
+        // The create endpoint has no media field; attach the hero via PATCH.
+        if (hero && id) await api(`/reporter/articles/${id}`, { method: "PATCH", body: { media: payload.media } });
       }
       if (submitForReview && id) {
         await api(`/reporter/articles/${id}/submit`, { method: "POST" });
@@ -141,6 +166,22 @@ export function ArticleComposerScreen() {
           multiline
           style={{ height: 220, paddingTop: 12, textAlignVertical: "top" }}
         />
+
+        <Text style={styles.label}>Hero image</Text>
+        <Pressable style={styles.heroBox} onPress={addHero} disabled={uploading}>
+          {hero ? (
+            <>
+              <RNImage source={{ uri: hero.localUri || hero.url || "" }} style={styles.heroImage} resizeMode="cover" />
+              <View style={styles.heroOverlay}>
+                <Text style={styles.heroChange}>Change</Text>
+              </View>
+            </>
+          ) : uploading ? (
+            <ActivityIndicator color={theme.colors.purple} />
+          ) : (
+            <Text style={styles.heroPrompt}>+ Add hero image</Text>
+          )}
+        </Pressable>
 
         <Text style={styles.label}>Region</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
@@ -209,6 +250,29 @@ const styles = StyleSheet.create({
   rejectBanner: { backgroundColor: "rgba(220,38,38,0.08)", borderRadius: theme.radius.md, padding: 12, marginBottom: theme.spacing[3] },
   rejectTitle: { color: theme.colors.error, fontWeight: "800", marginBottom: 4 },
   rejectText: { color: theme.colors.error, fontSize: 13 },
+  heroBox: {
+    height: 180,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderStyle: "dashed",
+    backgroundColor: theme.colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+  },
+  heroImage: { width: "100%", height: "100%" },
+  heroOverlay: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: theme.colors.scrim,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderTopLeftRadius: theme.radius.md,
+  },
+  heroChange: { color: theme.colors.white, fontWeight: "700", fontSize: 12 },
+  heroPrompt: { color: theme.colors.purple, fontWeight: "700", fontSize: 14 },
   actionBar: {
     flexDirection: "row",
     gap: theme.spacing[3],

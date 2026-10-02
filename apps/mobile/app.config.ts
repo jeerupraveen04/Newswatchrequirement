@@ -14,7 +14,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   ios: { supportsTablet: true, bundleIdentifier: "app.newswatch.mobile" },
   android: { package: "app.newswatch.mobile", adaptiveIcon: { backgroundColor: "#8a007a" } },
-  plugins: ["expo-secure-store", "expo-video"],
+  plugins: ["expo-secure-store", "expo-video", "./plugins/withHermesSilentWarnings"],
   extra: {
     apiUrl: process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:4010/api/v1",
     socketUrl: process.env.EXPO_PUBLIC_SOCKET_URL ?? "http://localhost:4010",

@@ -744,6 +744,16 @@ Outputs: `apps/mobile/android/app/build/outputs/apk/{debug,release}/` and
 - Add `--parallel --build-cache` for faster incremental builds.
 - Do **not** pipe `gradlew` through `tail` while waiting — it buffers all output
   and looks frozen. Use `| tee /tmp/gradle-build.log` and `tail -f` instead.
+- **Hermes warnings are silenced.** Release builds used to print ~25 `hermesc`
+  warnings (`the variable "fetch"/"setTimeout"/... was not declared`,
+  `Direct call to eval()`). They are harmless false positives from Expo/RN
+  runtime code (Hermes does not know every host global) and do not fail the
+  build. They are suppressed via `hermesFlags` in
+  `apps/mobile/plugins/withHermesSilentWarnings.js` (a config plugin, because
+  `android/` is regenerated) which adds `-Wno-undefined-variable -Wno-direct-eval`.
+  To silence everything instead, use `-w`; to re-enable, remove the plugin from
+  `app.config.ts`. Verify with:
+  `./gradlew :app:createBundleReleaseJsAndAssets --console=plain 2>&1 | grep -c warning:`
 
 ### 21.3 Common build failures & fixes
 

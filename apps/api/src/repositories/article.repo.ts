@@ -85,6 +85,14 @@ export const articleRepo = {
       );
     }
 
+    // Category filter must be part of the query (not applied after LIMIT),
+    // otherwise pagination/cursor/hasMore are wrong.
+    if (args.categoryId) {
+      conditions.push(
+        sql`EXISTS (SELECT 1 FROM ${articleCategories} ac WHERE ac.article_id = ${articles.id} AND ac.category_id = ${args.categoryId})`,
+      );
+    }
+
     const rows = await db
       .select()
       .from(articles)
@@ -92,18 +100,8 @@ export const articleRepo = {
       .orderBy(desc(articles.publishedAt), desc(articles.id))
       .limit(args.limit + 1);
 
-    let filtered = rows;
-    if (args.categoryId) {
-      const cats = await db
-        .select({ articleId: articleCategories.articleId })
-        .from(articleCategories)
-        .where(eq(articleCategories.categoryId, args.categoryId));
-      const allowed = new Set(cats.map((c) => c.articleId));
-      filtered = rows.filter((r) => allowed.has(r.id));
-    }
-
     const hasMore = rows.length > args.limit;
-    const items = filtered.slice(0, args.limit);
+    const items = rows.slice(0, args.limit);
     const last = items[items.length - 1];
     const nextCursor =
       hasMore && last ? encodeCursor({ publishedAt: last.publishedAt!.toISOString(), id: last.id }) : null;

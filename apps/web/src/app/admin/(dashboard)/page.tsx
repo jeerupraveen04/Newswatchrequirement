@@ -1,11 +1,30 @@
+"use client";
+
 import Link from "next/link";
-import { getSession } from "@/lib/session";
+import { useApiQuery } from "@/lib/hooks";
+import { useSession } from "@/lib/use-session";
 
-export const metadata = { title: "Admin dashboard" };
+interface AnalyticsSummary {
+  totals: { published: number; views: number; likes: number; comments: number; bookmarks: number } | null;
+  topArticles: { id: string; title: string; views: number }[];
+}
 
-export default async function AdminDashboard() {
-  const session = await getSession();
+interface QueueItem {
+  id: string;
+  title: string;
+  status: string;
+  submittedAt: string | null;
+  reporterId: string;
+  regionId: string;
+}
+
+export default function AdminDashboard() {
+  const { session } = useSession();
   const isSuper = session.role === "super_admin";
+  const { data: analytics, isLoading } = useApiQuery<AnalyticsSummary>(["admin", "analytics"], "/admin/analytics/summary");
+  const { data: queue } = useApiQuery<QueueItem[]>(["admin", "moderation", "pending"], "/admin/moderation/queue?status=pending&limit=10");
+
+  const totals = analytics?.totals;
 
   return (
     <>
@@ -20,10 +39,43 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="grid grid-4 mb-3">
-        <div className="kpi"><div className="num">—</div><div className="lbl">Total articles</div></div>
-        <div className="kpi"><div className="num" style={{ color: "var(--warning)" }}>—</div><div className="lbl">Pending review</div></div>
-        <div className="kpi"><div className="num" style={{ color: "var(--success)" }}>—</div><div className="lbl">Published today</div></div>
-        <div className="kpi"><div className="num">{session.regionScopes.length}</div><div className="lbl">Scoped regions</div></div>
+        <div className="kpi"><div className="num">{isLoading ? "…" : totals?.published ?? 0}</div><div className="lbl">Published</div></div>
+        <div className="kpi"><div className="num" style={{ color: "var(--warning)" }}>{queue?.length ?? 0}</div><div className="lbl">Pending review</div></div>
+        <div className="kpi"><div className="num">{isLoading ? "…" : totals?.views ?? 0}</div><div className="lbl">Total views</div></div>
+        <div className="kpi"><div className="num">{isLoading ? "…" : totals?.likes ?? 0}</div><div className="lbl">Total likes</div></div>
+      </div>
+
+      <div className="grid grid-2 mb-3">
+        <div className="card card-pad">
+          <div className="section-title">Pending moderation</div>
+          {!queue || queue.length === 0 ? (
+            <p className="muted small">Nothing in the queue.</p>
+          ) : (
+            queue.slice(0, 5).map((q) => (
+              <div key={q.id} className="list-row">
+                <div className="grow">
+                  <div className="title">{q.title}</div>
+                  <div className="sub">{q.status}</div>
+                </div>
+              </div>
+            ))
+          )}
+          <Link href="/admin/articles" className="small" style={{ color: "var(--purple)", fontWeight: 700 }}>Open queue →</Link>
+        </div>
+
+        <div className="card card-pad">
+          <div className="section-title">Top articles</div>
+          {!analytics?.topArticles || analytics.topArticles.length === 0 ? (
+            <p className="muted small">No data yet.</p>
+          ) : (
+            analytics.topArticles.map((a) => (
+              <div key={a.id} className="list-row">
+                <div className="grow"><div className="title">{a.title}</div></div>
+                <span className="muted small">{a.views} views</span>
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       <div className="grid grid-2 mb-3">

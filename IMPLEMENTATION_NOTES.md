@@ -199,6 +199,62 @@ router-level `requireRole` blocked normal users, so R04 was unreachable). The
 remaining reporter routes keep `requireRole("reporter","admin","super_admin")`.
 `GET /bookmarks` now hydrates article rows (title/slug/summary) instead of IDs.
 
+## P5 — End-to-end verification audit (API + Web + Mobile)
+
+A full audit read every route, page, and screen (not just filenames) and found
+real defects, not only "thin" coverage. Fixed since:
+
+**API correctness bugs**
+- Comment list crashed with `malformed array literal` — `= ANY(${array}::uuid[])`
+  does not serialize with postgres.js. Replaced with Drizzle `inArray` (replies
+  and authors). This path had never been exercised by tests.
+- Deleting a **reply** decremented the article `comment_count` (only top-level
+  comments should count) — fixed.
+- **Unfollowing** a category never decremented `followerCount` — fixed.
+- Feed `categoryId` filter was applied **after `LIMIT`**, producing wrong pages
+  and `hasMore`. Moved into SQL (`EXISTS` subquery).
+- Notification producers were missing: added `reporter_article_status` on
+  moderation and `comment_reply` on replies (`notificationService.create`).
+- Added `GET /config` (feature flags + `minAppVersion` from public settings) and
+  `POST /analytics/events` (analytics ingestion into `analytics_events`).
+
+**Web defects**
+- **Signup was broken** — posted to `/api/auth/register`, which has no handler;
+  now posts to `/api/auth/session`.
+- Reporter dashboard read the **public feed** and showed global data; now uses
+  `/reporter/stats` + `/reporter/articles` (own data) via the proxy.
+- Admin dashboard (A02) was a pure placeholder (em-dash KPIs); now fetches
+  `/admin/analytics/summary` + `/admin/moderation/queue` for real KPIs.
+- The authenticated proxy never refreshed the 15-min access token; added a
+  single-flight refresh-and-retry on 401 (rotating tokens, re-reading the body).
+
+**Mobile**
+- Article composer had **no media upload at all**; added `expo-image-picker` and
+  `lib/media.ts` implementing sign → PUT → complete, with a hero-image picker
+  wired into the composer and `media` persisted via PATCH.
+- Notifications were non-interactive: added mark-read / mark-all-read, deep-link
+  handling, and unread styling.
+- Comments gained like (`POST /like` with `targetType: comment`).
+
+**Verified:** `pnpm -r typecheck` (all 6 packages), API tests 20/20,
+`expo export:embed` bundles 823 modules, and live smoke tests of
+`/config`, `/analytics/events`, category-filtered feed, and the
+comment create/list/reply/delete flow.
+
+### Known remaining gaps (documented, not yet built)
+
+- **Async side-channels are stubs**: OTP delivery, email, SMS, and FCM push log
+  instead of calling providers; `analytics_ingest`, `poster_render`,
+  `media_delete`, and `article_scheduled_publish` have no producers/workers.
+- **No scheduled-publish / breaking-flag endpoints** (no route sets
+  `scheduledAt` / `isBreaking`).
+- **In-memory cache, rate-limit, and Socket.IO** are single-instance.
+- **Mobile/Web missing pages**: P13 Search Results (merged), S01 system states
+  (maintenance/offline/404/error), P19 has no dedicated web route, P01/P02/P05
+  absent on web.
+- **OAuth** (Google/Apple) is not implemented in API or clients.
+- **No tests** for reporter/admin/media/jobs; web has no tests or ESLint config.
+
 ## P4 — Hardening (partial)
 
 - **Tests:** Vitest in `apps/api` — 20 tests (unit: slugify/wordCount/sanitize;

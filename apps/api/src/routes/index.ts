@@ -15,10 +15,14 @@ import { reporterRouter } from "./reporter.routes";
 import { adminRouter } from "./admin.routes";
 import { mediaRouter } from "./media.routes";
 import { shareRouter } from "./share.routes";
+import { configRouter } from "./config.routes";
+import { analyticsRouter } from "./analytics.routes";
 
 export const apiRouter: Router = Router();
 
 apiRouter.use(healthRouter);
+apiRouter.use(configRouter);
+apiRouter.use(analyticsRouter);
 apiRouter.use("/auth", authRouter);
 apiRouter.use("/categories", categoryRouter);
 apiRouter.use("/regions", regionRouter);

@@ -267,6 +267,31 @@ export function useToggleBookmark() {
   });
 }
 
+export function useMarkNotificationRead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api(`/notifications/${id}/read`, { method: "POST" }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["notifications"] }),
+  });
+}
+
+export function useMarkAllNotificationsRead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api("/notifications/read-all", { method: "POST" }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["notifications"] }),
+  });
+}
+
+export function useToggleFollow() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { targetType: "reporter" | "category"; targetId: string }) =>
+      api<{ following: boolean }>("/follows", { method: "POST", body: input }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["follows"] }),
+  });
+}
+
 export function usePostComment(articleId: string) {
   const qc = useQueryClient();
   return useMutation({

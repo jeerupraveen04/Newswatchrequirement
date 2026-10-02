@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "../db/client";
 import { ErrorCode } from "@newswatch/shared";
 import { AppError } from "../errors/AppError";
@@ -38,14 +38,14 @@ export const commentService = {
       ? await db
           .select()
           .from(comments)
-          .where(and(sql`${comments.parentId} = ANY(${parentIds}::uuid[])`, isNull(comments.deletedAt), eq(comments.isHidden, false)))
+          .where(and(inArray(comments.parentId, parentIds), isNull(comments.deletedAt), eq(comments.isHidden, false)))
           .orderBy(comments.createdAt)
       : [];
 
     // Attach authors.
     const authorIds = [...new Set([...rows, ...replies].map((c) => c.authorId))];
     const authors = authorIds.length
-      ? await db.select(authorSelect).from(users).where(sql`${users.id} = ANY(${authorIds}::uuid[])`)
+      ? await db.select(authorSelect).from(users).where(inArray(users.id, authorIds))
       : [];
     const authorMap = new Map(authors.map((a) => [a.id, a]));
 
@@ -88,8 +88,25 @@ export const commentService = {
           .where(eq(comments.id, parentId));
       }
       return comment!;
-    }).then((comment) => {
+    }).then(async (comment) => {
       realtime.commentNew(articleId, comment);
+      // Notify the parent comment's author on a reply (REQ-NOTIF).
+      if (parentId) {
+        const [parent] = await db.select().from(comments).where(eq(comments.id, parentId)).limit(1);
+        if (parent && parent.authorId !== principal.id) {
+          await notificationService
+            .create({
+              userId: parent.authorId,
+              type: "comment_reply",
+              title: "New reply to your comment",
+              body: body.slice(0, 120),
+              entityType: "article",
+              entityId: articleId,
+              deepLink: `newswatch://news/comment/${comment.id}`,
+            })
+            .catch(() => undefined);
+        }
+      }
       return comment;
     });
   },
@@ -111,15 +128,18 @@ export const commentService = {
     if (comment.authorId !== principal.id && !canModerate) throw new AppError(ErrorCode.FORBIDDEN, 403);
     await db.transaction(async (tx) => {
       await tx.update(comments).set({ deletedAt: new Date(), isHidden: true }).where(eq(comments.id, commentId));
-      await tx
-        .update(articles)
-        .set({ commentCount: sql`GREATEST(${articles.commentCount} - 1, 0)` })
-        .where(eq(articles.id, comment.articleId));
+      // Only top-level comments contribute to the article's comment_count;
+      // deleting a reply must not change it.
       if (comment.parentId) {
         await tx
           .update(comments)
           .set({ replyCount: sql`GREATEST(${comments.replyCount} - 1, 0)` })
           .where(eq(comments.id, comment.parentId));
+      } else {
+        await tx
+          .update(articles)
+          .set({ commentCount: sql`GREATEST(${articles.commentCount} - 1, 0)` })
+          .where(eq(articles.id, comment.articleId));
       }
     });
     return { removed: true };
@@ -235,7 +255,15 @@ export const followService = {
       )
       .limit(1);
     if (existing) {
-      await db.delete(follows).where(eq(follows.id, existing.id));
+      await db.transaction(async (tx) => {
+        await tx.delete(follows).where(eq(follows.id, existing.id));
+        if (targetType === "category") {
+          await tx
+            .update(categories)
+            .set({ followerCount: sql`GREATEST(${categories.followerCount} - 1, 0)` })
+            .where(eq(categories.id, targetId));
+        }
+      });
       return { following: false };
     }
     if (targetType === "reporter") {
